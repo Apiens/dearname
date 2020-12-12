@@ -1,6 +1,30 @@
 memo.md
 */secrets.json
 
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+frontend/node_modules
+frontend/.pnp
+.pnp.js
+
+# testing
+frontend/coverage
+
+# production
+frontend/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
 # Created by https://www.toptal.com/developers/gitignore/api/python,django,jupyternotebooks,node,react,vscode
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,django,jupyternotebooks,node,react,vscode
 

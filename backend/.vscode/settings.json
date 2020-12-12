@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "X:\\.venv\\django-react_env\\Scripts\\python.exe",
+    "python.formatting.provider": "black"
+}
