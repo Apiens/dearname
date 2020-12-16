@@ -16,8 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
+from django_pydenticon.views import image as pydenticon_image
 
 urlpatterns = [
+    path("", include("drosera.urls")),
+    path("accounts/", include("accounts.urls")),
+    path("identicon/image/<path:data>.png", pydenticon_image, name="pydenticon_image"),
     path("admin/", admin.site.urls),
 ]
 
