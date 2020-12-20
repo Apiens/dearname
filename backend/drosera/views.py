@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.db.models import Q
+from django.db.models import Q, query
 from django.utils import timezone, timesince
 from datetime import timedelta
 from rest_framework.generics import (
@@ -7,8 +7,8 @@ from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-from .models import Post
-from .serializers import PostSerializer
+from .models import Post, Photo, Comment
+from .serializers import CommentSerializer, PostSerializer, PhotoSerializer
 
 # from rest_framework.viewsets import ModelViewSet
 
@@ -48,6 +48,7 @@ class PostListCreateView(ListCreateAPIView):
         #     | Q(author=self.request.user.following_set.all())
         # )
         # self.request.user는 string이 아닌 UserInstance임(User.objects().get(username="asdf")
+        # TODO: -> 이거 qs=qs.filter로 받아야 함.
 
         qs.filter(created_at__gte=timesince)
         return qs
@@ -57,18 +58,53 @@ class PostListCreateView(ListCreateAPIView):
         # return super().perform_create(serializer) # Q: 강사님 이부분 왜 넣으신거지?
 
 
-class PostRUDView(RetrieveUpdateDestroyAPIView):
+class PostRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     serializer_class = PostSerializer
 
     # ListView와 마찬가지로 DetailView도 대상(나, 팔로우)것만 보여야 하므로
+    # def get_queryset(self):
+    #     # 캐싱된 .all() 에서 필터링하여 사용하기 위해 오버라이드.
+    #     timesince = timezone.now() - timedelta(days=3)
+    #     qs = super().get_queryset()
+    #     qs.filter(
+    #         Q(author=self.request.user)
+    #         | Q(author=self.request.user.following_set.all())
+    #     )
+    #     # self.request.user는 string이 아닌 UserInstance임(User.objects().get(username="asdf"))
+    #     qs.filter(created_at__gte=timesince)
+    #     return qs
+
+
+class PhotoListCreateView(ListCreateAPIView):
+    queryset = Photo.objects.all()  # .filter(attached_post=Post.objects.first())
+
+    serializer_class = PhotoSerializer
+
+    # def get_queryset(self):
+    #     post_obj = Post.objects.get(id=self.kwargs["post_id"])
+    #     queryset = super().get_queryset().filter(attached_post=post_obj)
+    #     print(queryset)
+    #     return queryset
+
     def get_queryset(self):
-        # 캐싱된 .all() 에서 필터링하여 사용하기 위해 오버라이드.
-        timesince = timezone.now() - timedelta(days=3)
-        qs = super().get_queryset()
-        qs.filter(
-            Q(author=self.request.user)
-            | Q(author=self.request.user.following_set.all())
-        )
-        # self.request.user는 string이 아닌 UserInstance임(User.objects().get(username="asdf"))
-        qs.filter(created_at__gte=timesince)
+        post_obj = Post.objects.get(id=self.kwargs["post_id"])
+        qs = super().get_queryset().filter(attached_post=post_obj)
+
+        # qs = super().get_queryset()
+        # qs.filter(attached_post=post_obj)
+        # 왜 이건 안됄까...?
+        # 알았다
+        # qs = super().get_queryset()
+        # qs = qs.filter(attached_post=post_obj)
+        # 이렇게 했어야 했다. (qs는 필터를 걸면 자기는 가만있고 새로운 qs를 리턴한다.)
+        return qs
+
+
+class CommentListCreateView(ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        post_obj = Post.objects.get(id=self.kwargs["post_id"])
+        qs = super().get_queryset().filter(post=post_obj)
         return qs

@@ -46,11 +46,24 @@ class PostSpeciesSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     author = AuthorSerializer(read_only=True)
-    subject_species = PostSpeciesSerializer()  # 기존 Species중에서 선택하게 하고싶은데..
+    subject_species = PostSpeciesSerializer()
+    # photoes = PhotoSerializer()
+    # 글자 입력이 아닌. 기존 Species중에서 선택하게 하고싶은데..
+    # 아니면 글자 입력시 자동추천...
+    # TODO: post_create에서 제대로 구현하기.
 
     class Meta:
         model = Post
-        fields = ["author", "caption", "location", "tag_set", "subject_species"]
+        fields = [
+            "id",
+            "author",
+            "caption",
+            "location",
+            "tag_set",
+            "subject_species",
+            "photo_set",
+            # "photoes",
+        ]
         # TODO: Q: like_user_set을 가져오지 않고 like_user_set의 길이만 가져오려면?
 
 
@@ -59,4 +72,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ["username", "author", "message"]
+        fields = ["author", "message"]
