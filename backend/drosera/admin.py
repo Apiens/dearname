@@ -20,9 +20,12 @@ class PostAdmin(admin.ModelAdmin):
 
     def photo_tag(self, post):
         # print(post.photo_set.first().url)
-        return mark_safe(
-            f"<img src={post.photo_set.first().url.url} style='width: 100px;' />"
-        )
+        if post.photo_set.first():
+            return mark_safe(
+                f"<img src={post.photo_set.first().url.url} style='width: 100px;' />"
+            )
+        else:
+            return "no_photo"
 
     def species(self, post):
         # print(post.subject_species.common_name)
