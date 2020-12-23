@@ -19,13 +19,12 @@ export default function PostCommentList({ postId }: any) {
     fetchData();
   }, []);
   return (
-    <div>
+    <div className="comment-list">
       <h4>PostCommentList</h4>
       {console.log("render with commentList: ", commentList)}
       {commentList.map((comment) => (
         <PostComment comment={comment} />
       ))}
-      <input placeholder="add_comment" />
     </div>
   );
 }

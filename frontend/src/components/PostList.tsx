@@ -18,8 +18,8 @@ export default function PostList() {
   }, [originalPostList]);
 
   return (
-    <div>
-      <h1>PostList</h1>
+    <div style={{ width: "600px" }}>
+      {/* <h1>PostList</h1> */}
       {console.log("loading :", loading)}
       {console.log("render PostList with postList:", postList)}
       {postList &&
