@@ -62,7 +62,7 @@ class Photo(models.Model):
     url = models.ImageField(upload_to="drosera/photo/%Y/%m/%d")
     # Q: url 말고 좋은 필드명은 없을까...? admin.py에서 url.url 쓰려니 이상하네;
     attached_post = models.ForeignKey(
-        Post, related_name="photo_set", on_delete=models.CASCADE
+        Post, related_name="photo_set", blank=True, on_delete=models.CASCADE
     )
     created_at = models.DateTimeField(
         blank=True

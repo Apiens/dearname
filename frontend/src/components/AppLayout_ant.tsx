@@ -8,7 +8,10 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import LogoImage from "assets/dearname_icon_white.png";
+import { Link } from "react-router-dom";
+import { useAppContext, deleteToken } from "store";
 const { Header, Content, Footer } = Layout;
+const { SubMenu } = Menu;
 
 type Props = {
   children: ReactNode;
@@ -16,6 +19,8 @@ type Props = {
 };
 
 export default function AppLayout({ children, sidebar }: Props) {
+  const { dispatch } = useAppContext();
+
   return (
     <div className="app">
       <header className="header">
@@ -31,20 +36,53 @@ export default function AppLayout({ children, sidebar }: Props) {
           >
             <Menu.Item
               key="1"
-              icon={<HomeOutlined style={{ fontSize: "1.4em" }} />}
-            />
+              icon={
+                <HomeOutlined
+                  style={{
+                    fontSize: "1.6em",
+                    margin: "auto",
+                  }}
+                />
+              }
+            >
+              <Link to="/" />
+            </Menu.Item>
             <Menu.Item
               key="2"
-              icon={<BookOutlined style={{ fontSize: "1.4em" }} />}
-            />
+              icon={
+                <BookOutlined style={{ fontSize: "1.6em", margin: "auto" }} />
+              }
+            >
+              <Link to="/mycollections/" />
+            </Menu.Item>
             <Menu.Item
               key="3"
-              icon={<FormOutlined style={{ fontSize: "1.4em" }} />}
-            />
-            <Menu.Item
-              key="4"
-              icon={<UserOutlined style={{ fontSize: "1.4em" }} />}
-            />
+              icon={
+                <FormOutlined style={{ fontSize: "1.6em", margin: "auto" }} />
+              }
+              style={{ verticalAlign: "bottom" }}
+            >
+              <Link to="/post/create" />
+            </Menu.Item>
+            <SubMenu
+              key="Sub1"
+              icon={
+                <UserOutlined style={{ fontSize: "1.6em", margin: "auto" }} />
+              }
+              // style={{ position: "relative", top: "10px" }}
+            >
+              <Menu.Item key="4">
+                <Link to="/accounts/main/">Profile</Link>
+              </Menu.Item>
+              <Menu.Item
+                key="5"
+                onClick={() => {
+                  dispatch(deleteToken());
+                }}
+              >
+                <div>Log out</div>
+              </Menu.Item>
+            </SubMenu>
           </Menu>
         </nav>
       </header>
@@ -52,7 +90,7 @@ export default function AppLayout({ children, sidebar }: Props) {
         <section className="main__contents">{children}</section>
         <section
           className="main__sidebar"
-          style={{ wFidth: "300px", height: "300px" }}
+          style={{ width: "300px", height: "300px" }}
         >
           this is the sidebar area. asdfasdfasdfasdfasdfasdfasdfasdf
         </section>

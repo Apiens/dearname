@@ -2,15 +2,21 @@ import React, { useEffect, useState } from "react";
 import useAxios from "axios-hooks";
 import Axios from "axios";
 import Post from "./Post";
+import { useAppContext } from "store";
 
 export default function PostList() {
   const [postList, setPostList] = useState([]);
   const apiUrl = "http://localhost:8000/api/posts/";
+  const {
+    store: { jwtToken },
+  } = useAppContext();
+  const headers = { Authorization: `JWT ${jwtToken}` };
+  const [{ data: originalPostList, loading, error }, refetch] = useAxios({
+    url: apiUrl,
+    headers,
+  });
 
-  const [{ data: originalPostList, loading, error }, refetch] = useAxios(
-    apiUrl
-  );
-  // console.log("data: ", data);
+  console.log("originalPostList: ", originalPostList);
 
   useEffect(() => {
     console.log("start useEffect from PostList");

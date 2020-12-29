@@ -4,7 +4,7 @@ import PostList from "components/PostList";
 import AppLayout from "components/AppLayout_ant";
 import "./Home.scss";
 
-export default function Root() {
+export default function Home() {
   return (
     <div>
       {/* <AppLayout>

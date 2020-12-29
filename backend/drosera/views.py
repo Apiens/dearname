@@ -39,18 +39,18 @@ class PostListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         # 캐싱된 .all() 에서 필터링하여 사용하기 위해 오버라이드.
-        timesince = timezone.now() - timedelta(days=3)
+        timesince = timezone.now() - timedelta(days=30)
         qs = super().get_queryset()
 
-        # #Uncomment after implement of authentication & authorization.
-        # qs.filter(
-        #     Q(author=self.request.user)
-        #     | Q(author=self.request.user.following_set.all())
-        # )
+        # Uncomment after implement of authentication & authorization.
+        qs = qs.filter(
+            Q(author=self.request.user)
+            | Q(author__in=self.request.user.following_set.all())
+        )
         # self.request.user는 string이 아닌 UserInstance임(User.objects().get(username="asdf")
         # TODO: -> 이거 qs=qs.filter로 받아야 함.
 
-        qs.filter(created_at__gte=timesince)
+        qs = qs.filter(created_at__gte=timesince)
         return qs
 
     def perform_create(self, serializer):

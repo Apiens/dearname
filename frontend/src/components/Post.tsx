@@ -4,9 +4,15 @@ import PostCommentList from "./PostCommentList";
 import PostLikeBtn from "./PostLikeBtn";
 import PostPhotoList from "./PostPhotoList";
 import { Card, Avatar } from "antd";
+import { useAppContext } from "store";
 import "./Post.scss";
 
 export default function Post({ post }: any) {
+  const {
+    store: { jwtToken },
+  } = useAppContext();
+  const headers = { Authorization: `JWT ${jwtToken}` };
+
   const {
     author: { username },
     caption,
@@ -18,7 +24,10 @@ export default function Post({ post }: any) {
   //   console.log(post);
   //   console.log(author, caption);
   const apiUrl = "http://localhost:8000/api/posts/";
-  const [{ data, loading, error }, refetch] = useAxios(apiUrl);
+  const [{ data, loading, error }, refetch] = useAxios({
+    url: apiUrl,
+    headers,
+  });
   return (
     <article className="post-card">
       {console.log("rendering post with postId:", postId)}

@@ -14,7 +14,9 @@ class SignupSerializer(serializers.ModelSerializer):
         # self.create 메소드가 실행되는데 이를 오버라이드.
         # 그냥 두면 user.password = validated_data["password"] 처럼
         # password를 암호화 하지 않고 그냥 저장함.
-        user = User.objects.create(username=validated_data["username"])
+        user = User.objects.create(
+            username=validated_data["username"], email=validated_data["email"]
+        )
         user.set_password(validated_data["password"])
         user.save()
 
@@ -26,4 +28,4 @@ class SignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "password"]  # pk 대신 id써도 됨.
+        fields = ["id", "username", "password", "email"]  # pk 대신 id써도 됨.
