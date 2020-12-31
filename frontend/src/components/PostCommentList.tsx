@@ -10,7 +10,7 @@ export default function PostCommentList({ postId }: any) {
   const headers = { Authorization: `JWT ${jwtToken}` };
 
   const [commentList, setCommentList] = useState([]);
-  const apiUrl = `http://localhost:8000/api/posts/${postId}/comments`;
+  const apiUrl = `http://localhost:8000/api/posts/${postId}/comments/`;
 
   useEffect(() => {
     async function fetchData() {

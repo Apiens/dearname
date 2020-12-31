@@ -2,11 +2,16 @@ from django.shortcuts import render
 from django.db.models import Q, query
 from django.utils import timezone, timesince
 from datetime import timedelta
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.generics import (
     CreateAPIView,
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
+    GenericAPIView,
+    get_object_or_404,
 )
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
 from .models import Post, Photo, Comment
 from .serializers import CommentSerializer, PostSerializer, PhotoSerializer
 
@@ -34,7 +39,11 @@ from .serializers import CommentSerializer, PostSerializer, PhotoSerializer
 class PostListCreateView(ListCreateAPIView):
     # queryset은 한번 받으면 캐싱해서 쓰므로 all()로 받아와서 캐싱해놓는다.
     # N+1 문제를 해결하기 위해 related fields는 select_related, prefetch_related사용.
-    queryset = Post.objects.all()
+    queryset = (
+        Post.objects.all()
+        .select_related("author")
+        .prefetch_related("tag_set", "like_user_set")
+    )
     serializer_class = PostSerializer
 
     def get_queryset(self):
@@ -73,6 +82,20 @@ class PostRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     #     # self.request.user는 string이 아닌 UserInstance임(User.objects().get(username="asdf"))
     #     qs.filter(created_at__gte=timesince)
     #     return qs
+
+
+class PostLikeCreateDestroyView(GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        print("post() executed")
+        post_instance = get_object_or_404(Post, pk=self.kwargs["post_id"])
+        post_instance.like_user_set.add(self.request.user)
+        return Response(status.HTTP_201_CREATED)
+
+    def delete(self, request, *args, **kwargs):
+        print("delete() executed")
+        post_instance = get_object_or_404(Post, pk=self.kwargs["post_id"])
+        post_instance.like_user_set.remove(self.request.user)
+        return Response(status.HTTP_204_NO_CONTENT)
 
 
 class PhotoListCreateView(ListCreateAPIView):

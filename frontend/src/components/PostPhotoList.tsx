@@ -11,7 +11,7 @@ export default function PostPhotoList({ postId }: any) {
   } = useAppContext();
   const headers = { Authorization: `JWT ${jwtToken}` };
 
-  const apiUrl = `http://localhost:8000/api/posts/${postId}/photos`;
+  const apiUrl = `http://localhost:8000/api/posts/${postId}/photos/`;
   const [photoList, setPhotoList] = useState([]);
   // carousel settings
   const settings = {

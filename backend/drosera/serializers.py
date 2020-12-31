@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.http import request
 from rest_framework import serializers
 from rest_framework.utils import serializer_helpers
 from .models import Post, Comment, Photo, Species
@@ -47,6 +48,25 @@ class PostSpeciesSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     author = AuthorSerializer(read_only=True)
     subject_species = PostSpeciesSerializer()
+    is_like = serializers.SerializerMethodField("is_like_field")
+    like_user_count = serializers.SerializerMethodField("like_user_count_field")
+
+    def is_like_field(self, post):
+        if "request" in self.context:
+            user = self.context["request"].user
+            try:
+                is_like = post.like_user_set.filter(pk=user.pk).exists()
+                # Q: Is this filtered by Hash?(O(1)) or Linear search?(O(n))
+                # Maybe this can be counted in user's aspect. e.g. this_post in user.like_post_set
+
+            except:  # e.g. anonymous user
+                is_like = False
+            return is_like
+        return False
+
+    def like_user_count_field(self, post):
+        return post.like_user_set.count()
+
     # photoes = PhotoSerializer()
     # 글자 입력이 아닌. 기존 Species중에서 선택하게 하고싶은데..
     # 아니면 글자 입력시 자동추천...
@@ -60,8 +80,11 @@ class PostSerializer(serializers.ModelSerializer):
             "caption",
             "location",
             "tag_set",
+            "created_at",
             "subject_species",
             "photo_set",
+            "is_like",
+            "like_user_count"
             # "photoes",
         ]
         # TODO: Q: like_user_set을 가져오지 않고 like_user_set의 길이만 가져오려면?
