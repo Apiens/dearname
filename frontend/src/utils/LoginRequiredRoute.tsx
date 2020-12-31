@@ -19,6 +19,7 @@ export default function LoginRequiredRoute({
       {...kwargs}
       render={(props) => {
         if (isAuthenticated) {
+          console.log("isAuthenticated: ", isAuthenticated);
           return <Component {...props} />;
         } else {
           return (

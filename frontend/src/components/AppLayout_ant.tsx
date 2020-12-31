@@ -18,7 +18,7 @@ type Props = {
   sidebar?: ReactNode;
 };
 
-export default function AppLayout({ children, sidebar }: Props) {
+export default function AppLayout({ children }: Props) {
   const { dispatch } = useAppContext();
 
   return (
@@ -26,7 +26,9 @@ export default function AppLayout({ children, sidebar }: Props) {
       <header className="header">
         <nav className="header__nav">
           <div className="header__logo">
-            <img src={LogoImage} width="120px" height="54px" alt="" />
+            <Link to="/">
+              <img src={LogoImage} width="120px" height="54px" alt="" />
+            </Link>
           </div>
           <Menu
             className="menu"
@@ -52,8 +54,9 @@ export default function AppLayout({ children, sidebar }: Props) {
               icon={
                 <BookOutlined style={{ fontSize: "1.6em", margin: "auto" }} />
               }
+              style={{ verticalAlign: "bottom" }}
             >
-              <Link to="/mycollections/" />
+              <Link to="/user_collections" />
             </Menu.Item>
             <Menu.Item
               key="3"
@@ -72,7 +75,7 @@ export default function AppLayout({ children, sidebar }: Props) {
               // style={{ position: "relative", top: "10px" }}
             >
               <Menu.Item key="4">
-                <Link to="/accounts/main/">Profile</Link>
+                <Link to="/user_main">Profile</Link>
               </Menu.Item>
               <Menu.Item
                 key="5"
@@ -86,15 +89,7 @@ export default function AppLayout({ children, sidebar }: Props) {
           </Menu>
         </nav>
       </header>
-      <main className="main">
-        <section className="main__contents">{children}</section>
-        <section
-          className="main__sidebar"
-          style={{ width: "300px", height: "300px" }}
-        >
-          this is the sidebar area. asdfasdfasdfasdfasdfasdfasdfasdf
-        </section>
-      </main>
+      <main className="main">{children}</main>
       <footer className="footer">
         <div>Ant Design ©2018 Created by Ant UED</div>
       </footer>

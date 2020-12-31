@@ -7,12 +7,15 @@ import "./Home.scss";
 export default function Home() {
   return (
     <div>
-      {/* <AppLayout>
+      <section>
         <PostList />
-      </AppLayout> */}
-      <AppLayout>
-        <PostList />
-      </AppLayout>
+      </section>
+      <section
+        className="main__sidebar"
+        style={{ width: "300px", height: "300px" }}
+      >
+        this is the sidebar area. asdfasdfasdfasdfasdfasdfasdfasdf
+      </section>
     </div>
   );
 }
