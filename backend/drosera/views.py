@@ -9,6 +9,7 @@ from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
     GenericAPIView,
+    DestroyAPIView,
     get_object_or_404,
 )
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
@@ -129,5 +130,23 @@ class CommentListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         post_obj = Post.objects.get(id=self.kwargs["post_id"])
-        qs = super().get_queryset().filter(post=post_obj)
+        qs = super().get_queryset().filter(post=post_obj)[:3]
         return qs
+
+    def perform_create(self, serializer):
+        post = get_object_or_404(Post, pk=self.kwargs["post_id"])
+        serializer.save(author=self.request.user, post=post)
+        return super().perform_create(serializer)
+
+
+class CommentDestroyAPIView(DestroyAPIView):
+    queryset = Comment.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # permission check. Q: Can this checked by rest_framework.permission? (by assigning permission class.)
+        if self.request.user == instance.author:
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        # return Response(status=status.HTTP_204_NO_CONTENT)

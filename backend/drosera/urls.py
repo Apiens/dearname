@@ -7,4 +7,5 @@ urlpatterns = [
     path("api/posts/<int:post_id>/photos/", views.PhotoListCreateView.as_view()),
     path("api/posts/<int:post_id>/comments/", views.CommentListCreateView.as_view()),
     path("api/posts/<int:post_id>/like/", views.PostLikeCreateDestroyView.as_view()),
+    path("api/comments/<int:pk>/", views.CommentDestroyAPIView.as_view()),
 ]

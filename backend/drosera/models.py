@@ -52,6 +52,8 @@ class Comment(TimestampedModel):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     message = models.TextField(max_length=400)
     # TODO: comment on comment
+    class Meta:
+        ordering = ["-id"]
 
 
 class Tag(models.Model):

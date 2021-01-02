@@ -92,7 +92,14 @@ class PostSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = AuthorSerializer(read_only=True)
+    is_author = serializers.SerializerMethodField("is_author_field")
+
+    def is_author_field(self, comment):
+        if "request" in self.context:
+            user = self.context["request"].user
+            return comment.author.pk == user.pk
+        return False
 
     class Meta:
         model = Comment
-        fields = ["author", "message"]
+        fields = ["id", "author", "message", "is_author"]

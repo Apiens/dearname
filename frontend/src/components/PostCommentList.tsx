@@ -2,6 +2,7 @@ import Axios from "axios";
 import React, { useEffect, useState } from "react";
 import PostComment from "./PostComment";
 import { useAppContext } from "store";
+import { Input, Button } from "antd";
 
 export default function PostCommentList({ postId }: any) {
   const {
@@ -9,7 +10,10 @@ export default function PostCommentList({ postId }: any) {
   } = useAppContext();
   const headers = { Authorization: `JWT ${jwtToken}` };
 
-  const [commentList, setCommentList] = useState([]);
+  const [commentList, setCommentList] = useState([
+    { author: { username: "", avatar_url: "" }, id: 0, message: "" },
+  ]);
+  const [commentContent, setCommentContent] = useState("");
   const apiUrl = `http://localhost:8000/api/posts/${postId}/comments/`;
 
   useEffect(() => {
@@ -26,13 +30,59 @@ export default function PostCommentList({ postId }: any) {
     }
     fetchData();
   }, []);
+
+  const addComment = async () => {
+    const response = await Axios.post(
+      apiUrl,
+      { message: commentContent },
+      { headers }
+    );
+    console.log("comment add success. response: ", response);
+    setCommentList((prevState) => {
+      return [response.data].concat(prevState);
+    });
+  };
+
   return (
-    <div className="comment-list">
-      <h4>PostCommentList</h4>
-      {console.log("render with commentList: ", commentList)}
-      {commentList.map((comment) => (
-        <PostComment comment={comment} />
-      ))}
-    </div>
+    <>
+      <div className="comment-list">
+        {console.log("render with commentList: ", commentList)}
+        {commentList.map((comment) => (
+          <PostComment comment={comment} setCommentList={setCommentList} />
+        ))}
+      </div>
+      <div
+        className="card-leave_comment"
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Input.TextArea
+          style={{
+            marginBottom: ".5em",
+            display: "inline",
+            height: "1em",
+            maxHeight: "4em",
+            maxWidth: "88%",
+            width: "88%",
+          }}
+          autoSize={{ maxRows: 4 }}
+          maxLength={200}
+          value={commentContent}
+          onChange={(e) => setCommentContent(e.target.value)}
+        />
+        <Button
+          block
+          type="primary"
+          style={{ marginBottom: ".5em", display: "inline", maxWidth: "10%" }}
+          disabled={commentContent.length === 0}
+          onClick={addComment}
+        >
+          게시
+        </Button>
+      </div>
+    </>
   );
 }
