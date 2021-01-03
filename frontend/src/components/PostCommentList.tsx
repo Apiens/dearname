@@ -38,6 +38,7 @@ export default function PostCommentList({ postId }: any) {
       { headers }
     );
     console.log("comment add success. response: ", response);
+    setCommentContent("");
     setCommentList((prevState) => {
       return [response.data].concat(prevState);
     });

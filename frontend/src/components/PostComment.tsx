@@ -30,7 +30,10 @@ export default function PostComment({ comment, setCommentList }: any) {
       {console.log("comment data: ", comment)}
       <span>{comment.message}</span>
       {comment.is_author && (
-        <span style={{ float: "right" }} onClick={deleteComment}>
+        <span
+          style={{ float: "right", cursor: "pointer" }}
+          onClick={deleteComment}
+        >
           <DeleteOutlined />
         </span>
       )}
