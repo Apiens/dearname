@@ -47,7 +47,9 @@ class Post(TimestampedModel):
 
 class Comment(TimestampedModel):
     author = models.ForeignKey(
-        get_user_model(), related_name="my_comment_set", on_delete=models.CASCADE
+        get_user_model(),
+        related_name="my_comment_set",
+        on_delete=models.CASCADE,
     )
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     message = models.TextField(max_length=400)
@@ -61,6 +63,12 @@ class Tag(models.Model):
 
 
 class Photo(models.Model):
+    author = models.ForeignKey(
+        get_user_model(),
+        related_name="my_photo_set",
+        on_delete=models.CASCADE,
+        null=True,
+    )
     url = models.ImageField(upload_to="drosera/photo/%Y/%m/%d")
     # Q: url 말고 좋은 필드명은 없을까...? admin.py에서 url.url 쓰려니 이상하네;
     attached_post = models.ForeignKey(

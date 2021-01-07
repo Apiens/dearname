@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.db.models import Q, query
 from django.utils import timezone, timesince
-from datetime import timedelta
+from datetime import timedelta, datetime
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import (
@@ -13,8 +13,9 @@ from rest_framework.generics import (
     get_object_or_404,
 )
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
-from .models import Post, Photo, Comment
+from .models import Post, Photo, Comment, Species
 from .serializers import CommentSerializer, PostSerializer, PhotoSerializer
+import json
 
 # from rest_framework.viewsets import ModelViewSet
 
@@ -64,25 +65,64 @@ class PostListCreateView(ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-        # return super().perform_create(serializer) # Q: 강사님 이부분 왜 넣으신거지?
+        # print("request.data: ", self.request.data)
+
+        # creating a post instance
+        author = self.request.user
+        subject_species = Species.objects.get(
+            pk=self.request.data["subject_species_pk"]  # TODO: use .get()
+        )
+        print(subject_species)
+        post_instance = serializer.save(author=author, subject_species=subject_species)
+
+        # creating photo instances
+
+        # request.data is querydict(multi value dict).
+        # data['photo_set'] will return only the last value.
+        # data.getlist('photo_set') will return the list of values.
+        # as serializer expects a dictionary as an element, put the file into the dictionary.
+
+        photo_metadata_set = []
+        for meta_JSON in self.request.data.getlist(
+            "photo_metadata_set"
+        ):  # list of JSON string.
+            datetime_string_or_None = json.loads(meta_JSON).get("DateTimeOriginal")
+            metadata = {}
+            try:
+                metadata["created_at"] = datetime.strptime(
+                    datetime_string_or_None, "%Y:%m:%d %H:%M:%S"
+                )
+            except Exception as e:
+                print(
+                    "Exeption while parsing created_at from EXIF metadata. Error: ", e
+                )
+                metadata["created_at"] = datetime.now()
+            photo_metadata_set.append(metadata)
+
+        photo_set = self.request.data.getlist("photo_set")  # list of file instances
+
+        assert len(photo_metadata_set) == len(
+            photo_set
+        ), "photo_metatada_set and photh_set have different length."
+        photo_set_serializer = PhotoSerializer(
+            data=[
+                {
+                    "url": photo,
+                    "created_at": metadata["created_at"],
+                }
+                for photo, metadata in zip(photo_set, photo_metadata_set)
+            ],
+            many=True,
+        )
+        print("photo_set_serializer: ", photo_set_serializer)
+        photo_set_serializer.is_valid(raise_exception=True)
+        photo_set_serializer.save(
+            attached_post=post_instance, author=author, subject_species=subject_species
+        )
 
 
 class PostRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     serializer_class = PostSerializer
-
-    # ListView와 마찬가지로 DetailView도 대상(나, 팔로우)것만 보여야 하므로
-    # def get_queryset(self):
-    #     # 캐싱된 .all() 에서 필터링하여 사용하기 위해 오버라이드.
-    #     timesince = timezone.now() - timedelta(days=3)
-    #     qs = super().get_queryset()
-    #     qs.filter(
-    #         Q(author=self.request.user)
-    #         | Q(author=self.request.user.following_set.all())
-    #     )
-    #     # self.request.user는 string이 아닌 UserInstance임(User.objects().get(username="asdf"))
-    #     qs.filter(created_at__gte=timesince)
-    #     return qs
 
 
 class PostLikeCreateDestroyView(GenericAPIView):
@@ -136,6 +176,8 @@ class CommentListCreateView(ListCreateAPIView):
     def perform_create(self, serializer):
         post = get_object_or_404(Post, pk=self.kwargs["post_id"])
         serializer.save(author=self.request.user, post=post)
+        print("comment request.data: ", self.request.data)
+        print("comment type(request.data): ", type(self.request.data))
         return super().perform_create(serializer)
 
 

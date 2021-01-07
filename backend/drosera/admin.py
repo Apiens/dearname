@@ -50,6 +50,7 @@ class PhotoAdmin(admin.ModelAdmin):
 @admin.register(Species)
 class SpeciesAdmin(admin.ModelAdmin):
     list_display = [
+        "id",
         "index",
         "scientific_name",
         "common_name",

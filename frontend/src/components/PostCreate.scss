@@ -1,0 +1,13 @@
+.ant-upload-list {
+  width: 100%;
+  display: flex;
+  margin-top: 1em !important;
+  justify-content: center;
+}
+.ant-upload-list::before {
+  content: none !important;
+}
+
+.ant-upload-list-picture-card-container {
+  margin: 5px !important;
+}

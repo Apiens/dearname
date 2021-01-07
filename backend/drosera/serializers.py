@@ -34,9 +34,11 @@ class AuthorSerializer(serializers.ModelSerializer):
 
 
 class PhotoSerializer(serializers.ModelSerializer):
+    # url = serializers.SerializerMethodField()
+
     class Meta:
         model = Photo
-        fields = ["url"]
+        fields = ["url", "created_at"]
 
 
 class PostSpeciesSerializer(serializers.ModelSerializer):
@@ -46,8 +48,18 @@ class PostSpeciesSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
+    # fileList -> elements in this list has to be either Image or Video. WriteONLY. How...?
     author = AuthorSerializer(read_only=True)
-    subject_species = PostSpeciesSerializer()
+    subject_species = PostSpeciesSerializer(read_only=True)
+    # subject_species_pk = serializers.IntegerField(write_only=True)
+
+    ##TEST: when read -> use PhotoSerializer. when write -> just pass the data in raw.  does it work?
+    # RESULT: it doesn't' work. raise attribute error. by relatedmanager.
+    # error message: 'RelatedManager' object has no attribute 'url'.
+    # => I found why I faild. i didn't add 'many=True'
+    # works after adding many=True.
+    photo_set = PhotoSerializer(many=True, read_only=True)
+
     is_like = serializers.SerializerMethodField("is_like_field")
     like_user_count = serializers.SerializerMethodField("like_user_count_field")
 
@@ -58,14 +70,17 @@ class PostSerializer(serializers.ModelSerializer):
                 is_like = post.like_user_set.filter(pk=user.pk).exists()
                 # Q: Is this filtered by Hash?(O(1)) or Linear search?(O(n))
                 # Maybe this can be counted in user's aspect. e.g. this_post in user.like_post_set
-
-            except:  # e.g. anonymous user
+            except:  # e.g. anonymous user or post without like_user_set.
                 is_like = False
             return is_like
         return False
 
     def like_user_count_field(self, post):
-        return post.like_user_set.count()
+        try:
+            return post.like_user_set.count()
+        except Exception as e:
+            print("exeption while counting like_users: ", e)
+            return 0
 
     # photoes = PhotoSerializer()
     # 글자 입력이 아닌. 기존 Species중에서 선택하게 하고싶은데..
@@ -79,14 +94,18 @@ class PostSerializer(serializers.ModelSerializer):
             "author",
             "caption",
             "location",
-            "tag_set",
             "created_at",
             "subject_species",
+            # "subject_species_pk",
             "photo_set",
             "is_like",
             "like_user_count"
             # "photoes",
         ]
+        extra_kwargs = {
+            # "subject_species_pk": {"write_only": True},
+            "photo_set": {"read_only": True},
+        }
         # TODO: Q: like_user_set을 가져오지 않고 like_user_set의 길이만 가져오려면?
 
 
