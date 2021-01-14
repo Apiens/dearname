@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django.db.models import Q, query
 from django.utils import timezone, timesince
+from django.views.generic import View
 from datetime import timedelta, datetime
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import (
     CreateAPIView,
+    ListAPIView,
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
     GenericAPIView,
@@ -13,9 +15,19 @@ from rest_framework.generics import (
     get_object_or_404,
 )
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin
+from rest_framework.views import APIView
 from .models import Post, Photo, Comment, Species
-from .serializers import CommentSerializer, PostSerializer, PhotoSerializer
+from .serializers import (
+    CommentSerializer,
+    PostSerializer,
+    PhotoSerializer,
+    PredictImageSerializer,
+    SpeceisDictSerializer,
+)
 import json
+import tensorflow as tf
+import numpy as np
+from PIL import Image
 
 # from rest_framework.viewsets import ModelViewSet
 
@@ -36,6 +48,22 @@ import json
 
 # class PostViewSet(ModelViewSet):
 #     pass
+
+tf_model = tf.keras.models.load_model("v0.0.2_over100(327 species)_Oct.18.1107.h5")
+species_info = (
+    Species.objects.all()
+)  # load table on memory. # loading as a dict will be also effecient.
+species_info_dict = {
+    record.index: [
+        record.index,
+        record.genus + " " + record.specific_name,
+        record.common_name_KOR,
+        record.common_name,
+        record.id,
+    ]
+    for record in species_info
+}
+# print(species_info_dict)
 
 
 class PostListCreateView(ListCreateAPIView):
@@ -103,7 +131,7 @@ class PostListCreateView(ListCreateAPIView):
 
         assert len(photo_metadata_set) == len(
             photo_set
-        ), "photo_metatada_set and photh_set have different length."
+        ), "photo_metatada_set and photo_set have different length."
         photo_set_serializer = PhotoSerializer(
             data=[
                 {
@@ -192,3 +220,49 @@ class CommentDestroyAPIView(DestroyAPIView):
             self.perform_destroy(instance)
             return Response(status=status.HTTP_204_NO_CONTENT)
         # return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PredictSpeciesAPIView(GenericAPIView):
+    serializer_class = PredictImageSerializer
+
+    def post(self, request, *args, **kwargs):
+        image_to_classify = request.data.get("file").file
+        image_to_classify_PIL = (
+            Image.open(image_to_classify).convert("RGB").resize((456, 456))
+        )
+        nd_array = np.expand_dims(np.array(image_to_classify_PIL) / 255.0, axis=0)
+        result = tf_model.predict(nd_array)
+        # result_index = result.argmax(axis=1)[0] + 1
+        # if (538 <= result_index <= 590) or result_index in [593, 594, 595]:
+        #     result_index = 600  # no-bird
+        # result_index = "AV_000" + f"{result_index:0>3}"
+        # print("result_index:", result_index)
+
+        result_top3 = (
+            np.argsort(result, axis=1)[0, ::-1][:3] + 1
+        )  # add 1 to each elements
+        print("result_top3: ", result_top3)
+        result_top3_index = [
+            "AV_000600"
+            if (538 <= result <= 590) or result in [593, 594, 595]
+            else "AV_000" + f"{result:0>3}"
+            for result in result_top3
+        ]
+        # result_top3_dict = [species_info_dict[i] for i in result_top3_index]
+
+        return Response(
+            data=result_top3_index,  # result_top3_dict,
+            # data = {
+            #     "common_name_KOR": species_instance.common_name_KOR,
+            #     "scientific_name": species_instance.genus + " " + species.specific_name,
+            # },
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+
+class BirdDictAPIView(ListAPIView):
+    queryset = Species.objects.all().prefetch_related("like_user_set")
+    serializer_class = SpeceisDictSerializer
+
+    def get(self, request):
+        return Response(data=species_info_dict, status=status.HTTP_200_OK)

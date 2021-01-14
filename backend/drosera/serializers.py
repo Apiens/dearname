@@ -42,9 +42,14 @@ class PhotoSerializer(serializers.ModelSerializer):
 
 
 class PostSpeciesSerializer(serializers.ModelSerializer):
+    scientific_name = serializers.SerializerMethodField("scientific_name_field")
+
+    def scientific_name_field(self, species):
+        return species.genus + " " + species.specific_name
+
     class Meta:
         model = Species
-        fields = ["common_name"]
+        fields = ["index", "scientific_name", "common_name", "common_name_KOR"]
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -122,3 +127,23 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ["id", "author", "message", "is_author"]
+
+
+class PredictImageSerializer(serializers.Serializer):
+
+    pass
+
+
+class SpeceisDictSerializer(serializers.ModelSerializer):
+    # userHaveMet = serializers.SerializerMethodField("userHaveMetField")
+
+    # def userHaveMetField(self, species):
+    #     if "request" in self.context:
+    #         user = self.context["request"].user
+    #     if species in user.met_species_set:
+    #        return True
+    ## user의 post.subject_species를 count해서 따로 보관?? user-species간의 manytomany를 만들고
+
+    class Meta:
+        model = Species
+        fields = "__all__"

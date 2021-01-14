@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import { useAppContext } from "store";
-import { Form, Input, Upload, message, Modal, Button } from "antd";
+import { Form, Input, Upload, message, Modal, Button, Select } from "antd";
 import { PlusOutlined, InboxOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
 import EXIF from "exif-js";
 import "./PostCreate.scss";
-import { ExitStatus } from "typescript";
 import { useHistory } from "react-router-dom";
 
 function getBase64(file: any) {
@@ -44,15 +43,63 @@ export interface UploadFile<T = any> {
   preview?: string;
 }
 
+interface dict {
+  [key: string]: any;
+}
+
+const { Option } = Select;
 export default function PostCreate(this: any, { postId }: any) {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [location, setLocation] = useState("");
   const [caption, setCaption] = useState("");
   const [subject_species_pk, setSubjectSpeciesPk] = useState("");
+  const [speciesPrediction, setSpeciesPrediction] = useState<Object>({});
+  const [sortedPrediction, setSortedPrediction] = useState<any>([]);
+  const [searchResult, setSearchResult] = useState<Object[]>([]);
+  const [selectedSpecies, setSelectedSpecies] = useState(undefined);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
+  const [birdDict, setBirdDict] = useState<dict>({});
+
+  const [form] = Form.useForm();
+  // const [headers, setHeaders] = useState({});
   const history = useHistory();
+
+  const apiUrl = `http://localhost:8000/api/posts/`;
+  const {
+    store: { jwtToken },
+  } = useAppContext();
+  const headers = { Authorization: `JWT ${jwtToken}` };
+  // setHeaders({ Authorization: `JWT ${jwtToken}` });
+
+  useEffect(() => {
+    console.log("useEffect after headers");
+    const fx = async () => {
+      const fetched_birdDict = await Axios.get(
+        "http://localhost:8000/api/bird_dict",
+        {
+          headers,
+        }
+      )
+        .then((response) => {
+          console.log("birdDict fetched_data. response:", response);
+          console.log("birdDict fetched_data", response.data);
+          return response.data;
+        })
+        .catch((error) => {
+          message.info(
+            "종 목록을 불러오는데 실패했습니다. 페이지를 새로고침(F5) 해 주세요."
+          );
+          console.log(
+            "error while fetching birdDict. error.response: ",
+            error.response
+          );
+        });
+      setBirdDict(fetched_birdDict);
+    };
+    fx();
+  }, []);
 
   // this seems very inefficient but extracting exif in onSubmit didn't work well.
   // also it turns out something happens when uplaod multiple images at once.
@@ -69,6 +116,7 @@ export default function PostCreate(this: any, { postId }: any) {
   // 그냥 비동기를 반목문 안에서 제어하려고 하면 좋을게 없는데 내가 그렇게 쓰려고 한 것 부터가 잘못인듯?
   const [exifList, setExifList] = useState<Object[]>([]);
   useEffect(() => {
+    console.log("useEffect after FileList");
     // console.log("file_list: ", fileList);
     for (const [index, file] of fileList.entries()) {
       EXIF.getData(file.originFileObj, () => {
@@ -81,7 +129,29 @@ export default function PostCreate(this: any, { postId }: any) {
           return prevExifList;
         });
       });
+      // WHY IT DOESN't WORK?
+      // file.response.forEach((element: any, index: any) => {
+      //   setSpeciesPrediction((prevValue) => {
+      //     return { ...prevValue, element: 3 - index };
+      //   });
+      // });
     }
+
+    // //Scoring prediction. Score 3,2,1 to Top1,2,3 respectively.
+    // for (const file of fileList) {
+    //   file.response &&
+    //     file.response.forEach((response: any, index: any) => {
+    //       setSpeciesPrediction((prevValue: any) => {
+    //         console.log("prevValue", prevValue);
+    //         const newValue: any = { ...prevValue };
+    //         newValue[response[2]] = prevValue[response[2]]
+    //           ? prevValue[response[2]] + 3 - index
+    //           : 3 - index;
+    //         console.log("newValue:", newValue);
+    //         return newValue;
+    //       });
+    //     });
+    // }
 
     // setExifList((prevExifList) => {
     //   prevExifList.push(metaData);
@@ -105,7 +175,46 @@ export default function PostCreate(this: any, { postId }: any) {
 
   const handleChange = (param: any) => {
     console.log("Upload Changed. param: ", param);
+    console.log("execute setFileList()");
     setFileList(param.fileList);
+
+    //Scoring prediction. Score 3,2,1 to Top1,2,3 respectively.
+    if (param.file.status === "done") {
+      param.file.response &&
+        param.file.response.forEach((response: string, index: any) => {
+          setSpeciesPrediction((prevValue: any) => {
+            console.log("prevValue", prevValue);
+            const newValue: any = { ...prevValue };
+            newValue[response] = prevValue[response]
+              ? prevValue[response] + 3 - index
+              : 3 - index;
+            console.log("newValue:", newValue);
+            return newValue;
+          });
+        });
+      // param.file.response &&
+      //   param.file.response.forEach((response: string, index: any) => {
+      //     setSpeciesPrediction((prevValue: any) => {
+      //       console.log("prevValue", prevValue);
+      //       const newValue: any = { ...prevValue };
+      //       newValue[birdDict[response][2]] = prevValue[birdDict[response][2]]
+      //         ? prevValue[birdDict[response][2]] + 3 - index
+      //         : 3 - index;
+      //       console.log("newValue:", newValue);
+      //       return newValue;
+      //     });
+      //   });
+    } else if (param.file.status === "removed") {
+      param.file.response &&
+        param.file.response.forEach((response: any, index: any) => {
+          setSpeciesPrediction((prevValue: any) => {
+            const newValue: any = { ...prevValue };
+            newValue[response] = prevValue[response] - 3 + index;
+            newValue[response] === 0 && delete newValue[response]; //delete if value===0
+            return newValue;
+          });
+        });
+    }
   };
   const handlePreview = async (file: any) => {
     if (!file.url && !file.preview) {
@@ -118,12 +227,6 @@ export default function PostCreate(this: any, { postId }: any) {
     );
   };
   const handleCancel = () => setPreviewVisible(false);
-
-  const apiUrl = `http://localhost:8000/api/posts/`;
-  const {
-    store: { jwtToken },
-  } = useAppContext();
-  const headers = { Authorization: `JWT ${jwtToken}` };
 
   const onSubmit = async (fieldValues: any) => {
     // adding fileList as photo_set.
@@ -180,17 +283,21 @@ export default function PostCreate(this: any, { postId }: any) {
         { headers }
       );
       console.log("post_succecss. response: ", response);
-
+      message.success("성공! 포스팅이 게시되었습니다.");
       //TODO: add message
 
       setFileList([]);
       setExifList([]);
-      setLocation(" ");
-      setSubjectSpeciesPk(" ");
-      setCaption(" ");
-
-      // history.push("/");
+      setLocation("");
+      setSubjectSpeciesPk("");
+      setCaption("");
+      setSpeciesPrediction({});
+      setSearchResult([]);
+      setSelectedSpecies(undefined);
     } catch (error) {
+      message.error(
+        "포스팅 게시에 실패했습니다. 페이지 새로고침(F5) 후 다시 작성해 주세요."
+      );
       console.log("error. error.response: ", error.response);
     }
   };
@@ -199,8 +306,20 @@ export default function PostCreate(this: any, { postId }: any) {
     console.log("l,s,c:", location, subject_species_pk, caption);
   }, [location, subject_species_pk, caption]);
 
+  // TODO: Dragger를 통한 multiupload와 함께 Cropper 기능 제공.
+  // (picture-card list에 등록되기 전 cropper로 선처리)
+  // Dragger에 multi image 등록시 작동 순서. before upload-> picture-card -> fileList ...?
+  useEffect(() => {
+    const sorted = Object.entries(speciesPrediction).sort(
+      ([, a], [, b]) => b - a // reverse of a-b
+    );
+    console.log("sorted:", sorted);
+    setSortedPrediction(sorted);
+  }, [speciesPrediction]);
+
   return (
     <Form
+      form={form}
       onFinish={onSubmit}
       style={{
         width: "64%",
@@ -209,26 +328,43 @@ export default function PostCreate(this: any, { postId }: any) {
         marginBottom: "20%",
       }}
     >
-      <Form.Item name="fileList">
-        <Upload.Dragger
-          // action=""
-          // headers=""
-          multiple={true}
-          listType="picture-card"
-          beforeUpload={() => false}
-          fileList={fileList}
-          onPreview={handlePreview}
-          onChange={handleChange}
-        >
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined />
-          </p>
-          <p className="ant-upload-text">클릭 또는 드래그하여 업로드</p>
-          <p className="ant-upload-hint">
-            당신이 만난 대상의 사진을 올려주세요.
-          </p>
-        </Upload.Dragger>
+      <Form.Item>
+        <ImgCrop grid rotate quality={0.8}>
+          <Upload.Dragger
+            action="http://localhost:8000/api/predict/"
+            headers={headers}
+            // multiple={true} // TODO: find a way to enable multiple with ImgCrop.
+            listType="picture-card"
+            // beforeUpload={() => false}
+            fileList={fileList}
+            onPreview={handlePreview}
+            onChange={handleChange}
+          >
+            <p className="ant-upload-drag-icon">
+              <InboxOutlined />
+            </p>
+            <p className="ant-upload-text">클릭 또는 드래그하여 업로드</p>
+            <p className="ant-upload-hint">
+              당신이 만난 대상의 사진을 올려주세요.
+            </p>
+          </Upload.Dragger>
+        </ImgCrop>
       </Form.Item>
+      {/* <Form.Item>
+        <ImgCrop rotate grid>
+          <Upload
+            // action=""
+            // headers=""
+            listType="picture-card"
+            // beforeUpload={() => false}
+            fileList={fileList}
+            onPreview={handlePreview}
+            onChange={handleChange}
+          >
+            {fileList.length < 5 && "+ Upload"}
+          </Upload>
+        </ImgCrop>
+      </Form.Item> */}
       <Modal
         visible={previewVisible}
         title={previewTitle}
@@ -237,15 +373,75 @@ export default function PostCreate(this: any, { postId }: any) {
       >
         <img alt="example" style={{ width: "100%" }} src={previewImage} />
       </Modal>
-
       <Form.Item>
-        <Input
-          placeholder="종을 입력해 주세요."
-          value={subject_species_pk}
-          onChange={(e) => {
-            setSubjectSpeciesPk(e.target.value);
+        <Select
+          value={selectedSpecies}
+          allowClear
+          // loading
+          optionFilterProp="value"
+          showSearch
+          style={{ width: "100%" }}
+          placeholder="종을 선택해 주세요"
+          // onFocus={() => {
+          //   console.log("focus");
+          // }}
+          // onBlur={() => {
+          //   console.log("blur");
+          // }}
+          onSearch={(input) => {
+            console.log("search");
+            setSearchResult([]);
+            const filtered_bird_dict = Object.values(birdDict).filter(
+              (bird_info) => {
+                return bird_info[2].indexOf(input) >= 0;
+              }
+            );
+            console.log("filtered_bird_dict", filtered_bird_dict);
+            setSearchResult(filtered_bird_dict);
           }}
-        />
+          onSelect={(value: any, option) => {
+            setSelectedSpecies(value);
+            setSubjectSpeciesPk(option.speciespk);
+          }}
+          filterOption={(input: any, option: any) =>
+            option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0
+          }
+          // filterSort={(optionA: any, optionB: any) =>
+          //   optionA.children
+          //     .toLowerCase()
+          //     .localeCompare(optionB.children.toLowerCase())
+          // }
+        >
+          {sortedPrediction.map((prediction: string[], index: number) => {
+            return (
+              index < 3 && (
+                <Option
+                  value={birdDict[prediction[0]][2]}
+                  speciespk={birdDict[prediction[0]][4]}
+                >
+                  <span>
+                    <strong>{birdDict[prediction[0]][2]}</strong>
+                  </span>
+                  <span style={{ float: "right" }}>
+                    <strong>AI Score {prediction[1]}</strong>
+                  </span>
+                </Option>
+              )
+            );
+          })}
+          {searchResult.map((bird: any) => {
+            return (
+              !sortedPrediction
+                .slice(0, 3)
+                .map((value: any) => value[0])
+                .includes(bird[0]) && (
+                <Option value={bird[2]} speciespk={bird[4]}>
+                  <span>{bird[2]}</span>
+                </Option>
+              )
+            );
+          })}
+        </Select>
       </Form.Item>
       <Form.Item>
         <Input
