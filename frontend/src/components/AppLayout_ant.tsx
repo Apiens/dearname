@@ -34,7 +34,7 @@ export default function AppLayout({ children }: Props) {
             className="menu"
             theme="dark"
             mode="horizontal"
-            defaultSelectedKeys={["1"]}
+            // defaultSelectedKeys={["1"]}
           >
             <Menu.Item
               key="1"

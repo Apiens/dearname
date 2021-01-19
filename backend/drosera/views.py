@@ -1,5 +1,6 @@
+from django.db.models.aggregates import Avg
 from django.shortcuts import render
-from django.db.models import Q, query
+from django.db.models import Q, query, Count, F
 from django.utils import timezone, timesince
 from django.views.generic import View
 from datetime import timedelta, datetime
@@ -22,9 +23,11 @@ from .serializers import (
     PostSerializer,
     PhotoSerializer,
     PredictImageSerializer,
-    SpeceisDictSerializer,
+    SpeciesDictSerializer,
+    MyCollectionSerializer,
 )
 import json
+
 import tensorflow as tf
 import numpy as np
 from PIL import Image
@@ -50,6 +53,7 @@ from PIL import Image
 #     pass
 
 tf_model = tf.keras.models.load_model("v0.0.2_over100(327 species)_Oct.18.1107.h5")
+
 species_info = (
     Species.objects.all()
 )  # load table on memory. # loading as a dict will be also effecient.
@@ -63,7 +67,18 @@ species_info_dict = {
     ]
     for record in species_info
 }
-# print(species_info_dict)
+species_info_dict2 = {
+    record.id: [
+        record.index,
+        record.genus + " " + record.specific_name,
+        record.common_name_KOR,
+        record.common_name,
+        record.id,
+        record.wiki_thumbnail_url,
+    ]
+    for record in species_info
+}
+print(species_info_dict)
 
 
 class PostListCreateView(ListCreateAPIView):
@@ -83,8 +98,9 @@ class PostListCreateView(ListCreateAPIView):
 
         # Uncomment after implement of authentication & authorization.
         qs = qs.filter(
-            Q(author=self.request.user)
-            | Q(author__in=self.request.user.following_set.all())
+            # Q(author=self.request.user)|
+            # Q(author__in=self.request.user.following_set.all())
+            author__in=self.request.user.following_set.all()
         )
         # self.request.user는 string이 아닌 UserInstance임(User.objects().get(username="asdf")
         # TODO: -> 이거 qs=qs.filter로 받아야 함.
@@ -260,9 +276,47 @@ class PredictSpeciesAPIView(GenericAPIView):
         )
 
 
-class BirdDictAPIView(ListAPIView):
-    queryset = Species.objects.all().prefetch_related("like_user_set")
-    serializer_class = SpeceisDictSerializer
+class BirdDictAPIView(GenericAPIView):
+    # queryset = Species.objects.all().prefetch_related("like_user_set")
+    # serializer_class = SpeciesDictSerializer  # doesn't matter because it isn't used
 
     def get(self, request):
         return Response(data=species_info_dict, status=status.HTTP_200_OK)
+
+
+class BirdDict2APIView(GenericAPIView):
+    # queryset = Species.objects.all().prefetch_related("like_user_set")
+    # serializer_class = SpeciesDictSerializer  # doesn't matter because it isn't used
+
+    def get(self, request):
+        return Response(data=species_info_dict2, status=status.HTTP_200_OK)
+
+
+class MyCollectionView(ListAPIView):
+    queryset = (
+        Post.objects.all().select_related("author").prefetch_related("subject_species")
+    )
+    serializer_class = MyCollectionSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = (
+            self.queryset.filter(author=self.request.user)
+            .values("subject_species")
+            .annotate(species=F("subject_species"))
+            .annotate(count=Count("subject_species"))
+            # https://docs.djangoproject.com/en/3.1/topics/db/aggregation/
+            # Interaction with default ordering or order_by()
+            .order_by()
+            .order_by("subject_species")
+        )
+        print(qs)
+        return qs
+
+
+# 유저가 만난 종.
+# 자기가 쓴 글(userinstance.post_set)의 species(.values(species))를 나타내는 column을 만들고 거기서 species 별로 count
+# model을 하나 만들고. UserCollection 만들고 레코드에 유저, 종, count적으면 되겠네.
+
+# 유저가 구입한 물품의 횟수 구하는것과 유사..?
+# User.

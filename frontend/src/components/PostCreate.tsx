@@ -74,7 +74,7 @@ export default function PostCreate(this: any, { postId }: any) {
   // setHeaders({ Authorization: `JWT ${jwtToken}` });
 
   useEffect(() => {
-    console.log("useEffect after headers");
+    console.log("useEffect after component mount");
     const fx = async () => {
       const fetched_birdDict = await Axios.get(
         "http://localhost:8000/api/bird_dict",

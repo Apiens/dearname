@@ -95,6 +95,7 @@ class Photo(models.Model):
 
 class Species(models.Model):
     # main_image = models.ImageField(upload_to="drosera/species_main_img")
+    wiki_thumbnail_url = CharField(max_length=1000)
     common_name = models.CharField(max_length=50, blank=True)
     common_name_KOR = models.CharField(max_length=50, blank=True)
     specific_name = models.CharField(max_length=50)

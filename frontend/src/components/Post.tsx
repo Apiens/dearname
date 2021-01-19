@@ -72,7 +72,7 @@ export default function Post({ post }: any) {
         </span>
         {/* <span>created_at: {created_at}</span> */}
         <span style={{ fontWeight: "bold" }}>
-          {subject_species.common_name}
+          {subject_species.common_name_KOR} {subject_species.common_name}
         </span>
         <span>at {location}</span>
       </div>

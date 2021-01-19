@@ -134,7 +134,7 @@ class PredictImageSerializer(serializers.Serializer):
     pass
 
 
-class SpeceisDictSerializer(serializers.ModelSerializer):
+class SpeciesDictSerializer(serializers.ModelSerializer):
     # userHaveMet = serializers.SerializerMethodField("userHaveMetField")
 
     # def userHaveMetField(self, species):
@@ -146,4 +146,25 @@ class SpeceisDictSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Species
-        fields = "__all__"
+        fields = [
+            "id",
+            "common_name",
+            "common_name_KOR",
+            "specific_name",
+            "genus",
+            "index",
+        ]
+
+
+class MyCollectionSerializer(serializers.Serializer):
+    # subject_species = serializers.IntegerField()
+    species = serializers.IntegerField()
+
+    # species = serializers.SerializerMethodField("species_field")
+    # def species_field(self, species):
+    #     return SpeciesDictSerializer(
+    #         Species.objects.get(pk=species["subject_species"])
+    #     ).data
+
+    # subject_species__count = serializers.IntegerField()
+    count = serializers.IntegerField()
