@@ -1,6 +1,7 @@
 from django.db.models.aggregates import Avg
 from django.shortcuts import render
-from django.db.models import Q, query, Count, F
+from django.db.models import Q, query, Count, F, Prefetch
+from django.contrib.auth import get_user, get_user_model
 from django.utils import timezone, timesince
 from django.views.generic import View
 from datetime import timedelta, datetime
@@ -81,14 +82,27 @@ species_info_dict2 = {
 print(species_info_dict)
 
 
+class MyPostListView(ListAPIView):
+    queryset = Post.objects.all().prefetch_related("photo_set")
+    serializer_class = ""
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs
+
+
 class PostListCreateView(ListCreateAPIView):
     # queryset은 한번 받으면 캐싱해서 쓰므로 all()로 받아와서 캐싱해놓는다.
     # N+1 문제를 해결하기 위해 related fields는 select_related, prefetch_related사용.
-    queryset = (
-        Post.objects.all()
-        .select_related("author")
-        .prefetch_related("tag_set", "like_user_set")
-    )
+
+    # Q: Very Import Question for Optimization
+    # like_user_set이나 comment_set의 경우 일부만 보여줘도 되는데 모두를 불러와 보여주게 된다.
+    # 어떻게 줄일 수 있을까..? 불러오기부터 줄여올 수 있다면 더 좋고, 아니라면 보여주기라도 줄이는게 좋다.
+    # 일단 여러가지로 찾아봐도 안나오거나 안된다. Prefetch로 limit 거는것도 안되고, 마땅한 subquery도 없는듯?
+    queryset = Post.objects.all().select_related("author", "subject_species")
+
+    # .filter() #subquery로 특정 post의 like_user_set을 일부만.
+
     serializer_class = PostSerializer
 
     def get_queryset(self):
@@ -97,15 +111,28 @@ class PostListCreateView(ListCreateAPIView):
         qs = super().get_queryset()
 
         # Uncomment after implement of authentication & authorization.
-        qs = qs.filter(
-            # Q(author=self.request.user)|
-            # Q(author__in=self.request.user.following_set.all())
-            author__in=self.request.user.following_set.all()
+        qs = (
+            qs.filter(
+                # Q(author=self.request.user)|
+                # Q(author__in=self.request.user.following_set.all())
+                author__in=self.request.user.following_set.all()
+            )
+            .filter(created_at__gte=timesince)
+            .prefetch_related("photo_set", "comment_set", "tag_set", "like_user_set")
+            .prefetch_related(
+                # prefetch can be regarded as a query "SELECT ... WHERE ... IN ..." which tags along previous queryset.
+                # assigning "queryset" argument is like linking additional queries on it.
+                # limiting(slicing) is not allowed(Q:why?). but additional filtering can be done.
+                Prefetch(
+                    # 포스팅에 좋아요를 누른 사람들 중 내가 팔로우 하는 사람들...
+                    # is this right? => it seems it is working without any noticeable problem(like N+1)!
+                    "like_user_set",
+                    queryset=get_user_model().objects.all()
+                    & self.request.user.following_set.all(),
+                    to_attr="like_following_user_set",
+                )
+            )
         )
-        # self.request.user는 string이 아닌 UserInstance임(User.objects().get(username="asdf")
-        # TODO: -> 이거 qs=qs.filter로 받아야 함.
-
-        qs = qs.filter(created_at__gte=timesince)
         return qs
 
     def perform_create(self, serializer):

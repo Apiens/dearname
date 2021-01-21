@@ -9,7 +9,11 @@ urlpatterns = [
     path("api/posts/<int:post_id>/like/", views.PostLikeCreateDestroyView.as_view()),
     path("api/comments/<int:pk>/", views.CommentDestroyAPIView.as_view()),
     path("api/predict/", views.PredictSpeciesAPIView.as_view()),
-    path("api/bird_dict", views.BirdDictAPIView.as_view()), # for suggestion and search in create post.
-    path("api/bird_dict2", views.BirdDict2APIView.as_view()), # for search in mycollection.
+    path(
+        "api/bird_dict", views.BirdDictAPIView.as_view()
+    ),  # for suggestion and search in create post.
+    path(
+        "api/bird_dict2", views.BirdDict2APIView.as_view()
+    ),  # for search in mycollection.
     path("api/mycollection", views.MyCollectionView.as_view()),
 ]

@@ -52,6 +52,21 @@ class PostSpeciesSerializer(serializers.ModelSerializer):
         fields = ["index", "scientific_name", "common_name", "common_name_KOR"]
 
 
+class CommentSerializer(serializers.ModelSerializer):
+    author = AuthorSerializer(read_only=True)
+    is_author = serializers.SerializerMethodField("is_author_field")
+
+    def is_author_field(self, comment):
+        if "request" in self.context:
+            user = self.context["request"].user
+            return comment.author.pk == user.pk
+        return False
+
+    class Meta:
+        model = Comment
+        fields = ["id", "author", "message", "is_author"]
+
+
 class PostSerializer(serializers.ModelSerializer):
     # fileList -> elements in this list has to be either Image or Video. WriteONLY. How...?
     author = AuthorSerializer(read_only=True)
@@ -64,18 +79,36 @@ class PostSerializer(serializers.ModelSerializer):
     # => I found why I faild. i didn't add 'many=True'
     # works after adding many=True.
     photo_set = PhotoSerializer(many=True, read_only=True)
-
+    comment_set = CommentSerializer(many=True, read_only=True)
+    # like_user_set = AuthorSerializer(many=True, read_only=True)
+    like_user_set = serializers.SerializerMethodField("like_user_set_field")
+    like_following_user_set = AuthorSerializer(many=True, read_only=True)
     is_like = serializers.SerializerMethodField("is_like_field")
     like_user_count = serializers.SerializerMethodField("like_user_count_field")
+
+    def like_user_set_field(self, post):
+        """Return the users who like the post"""
+        user = self.context["request"].user
+        # print("12", post.like_following_user_set)
+        return (
+            {"username": i.username}
+            for i in post.like_user_set.all()[:50]
+            # for i in post.like_following_user_set[:50]
+            # limiting to 50 people
+            # Check if it is ordered in "last like first"
+        )
 
     def is_like_field(self, post):
         if "request" in self.context:
             user = self.context["request"].user
             try:
-                is_like = post.like_user_set.filter(pk=user.pk).exists()
-                # Q: Is this filtered by Hash?(O(1)) or Linear search?(O(n))
-                # Maybe this can be counted in user's aspect. e.g. this_post in user.like_post_set
-            except:  # e.g. anonymous user or post without like_user_set.
+                is_like = user.pk in set(
+                    i.pk for i in post.like_user_set.all()
+                )  # Less query(sql).
+                # is_like = post.like_user_set.filter(pk=user.pk).exists() # additional filtering on prefetched query => More query
+
+            except Exception as e:  # e.g. anonymous user or post without like_user_set.
+                print(e)
                 is_like = False
             return is_like
         return False
@@ -101,32 +134,18 @@ class PostSerializer(serializers.ModelSerializer):
             "location",
             "created_at",
             "subject_species",
-            # "subject_species_pk",
+            "comment_set",
             "photo_set",
             "is_like",
-            "like_user_count"
-            # "photoes",
+            "like_user_set",
+            "like_user_count",
+            "like_following_user_set",
         ]
         extra_kwargs = {
             # "subject_species_pk": {"write_only": True},
             "photo_set": {"read_only": True},
         }
         # TODO: Q: like_user_set을 가져오지 않고 like_user_set의 길이만 가져오려면?
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    author = AuthorSerializer(read_only=True)
-    is_author = serializers.SerializerMethodField("is_author_field")
-
-    def is_author_field(self, comment):
-        if "request" in self.context:
-            user = self.context["request"].user
-            return comment.author.pk == user.pk
-        return False
-
-    class Meta:
-        model = Comment
-        fields = ["id", "author", "message", "is_author"]
 
 
 class PredictImageSerializer(serializers.Serializer):
