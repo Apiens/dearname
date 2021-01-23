@@ -13,9 +13,7 @@ export default function Home() {
       <section
         className="main__sidebar"
         style={{ width: "300px", height: "300px" }}
-      >
-        this is the sidebar area. asdfasdfasdfasdfasdfasdfasdfasdf
-      </section>
+      ></section>
     </div>
   );
 }

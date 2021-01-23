@@ -67,6 +67,38 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ["id", "author", "message", "is_author"]
 
 
+class MyPostSerializer(serializers.ModelSerializer):
+    comment_count = serializers.SerializerMethodField("comment_count_field")
+    like_user_count = serializers.SerializerMethodField("like_user_count_field")
+    photo_set = PhotoSerializer(many=True)
+    subject_species = PostSpeciesSerializer()
+
+    def like_user_count_field(self, post):
+        try:
+            return post.like_user_set.count()
+        except Exception as e:
+            print("exeption while counting like_users: ", e)
+            return 0
+
+    def comment_count_field(sef, post):
+        try:
+            return post.comment_set.count()
+        except Exception as e:
+            print("exeption while counting comments: ", e)
+            return 0
+
+    class Meta:
+        model = Post
+        fields = [
+            "id",
+            "subject_species",
+            "comment_count",
+            "created_at",
+            "photo_set",
+            "like_user_count",
+        ]
+
+
 class PostSerializer(serializers.ModelSerializer):
     # fileList -> elements in this list has to be either Image or Video. WriteONLY. How...?
     author = AuthorSerializer(read_only=True)
@@ -133,6 +165,7 @@ class PostSerializer(serializers.ModelSerializer):
             "caption",
             "location",
             "created_at",
+            "updated_at",
             "subject_species",
             "comment_set",
             "photo_set",

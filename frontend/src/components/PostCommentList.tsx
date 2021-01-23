@@ -4,32 +4,33 @@ import PostComment from "./PostComment";
 import { useAppContext } from "store";
 import { Input, Button } from "antd";
 
-export default function PostCommentList({ postId }: any) {
+export default function PostCommentList({ postId, comment_set }: any) {
   const {
     store: { jwtToken },
   } = useAppContext();
   const headers = { Authorization: `JWT ${jwtToken}` };
 
-  const [commentList, setCommentList] = useState([
-    { author: { username: "", avatar_url: "" }, id: 0, message: "" },
-  ]);
+  // const [commentList, setCommentList] = useState([
+  //   { author: { username: "", avatar_url: "" }, id: 0, message: "" },
+  // ]);
+  const [commentList, setCommentList] = useState(comment_set);
   const [commentContent, setCommentContent] = useState("");
-  const apiUrl = `http://localhost:8000/api/posts/${postId}/comments/`;
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data: fetchedComments }: any = await Axios.get(apiUrl, {
-          headers,
-        });
-        console.log("fetched_comments: ", fetchedComments);
-        setCommentList(fetchedComments);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    fetchData();
-  }, []);
+  const apiUrl = `http://localhost:8000/api/posts/${postId}/comments/`;
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     try {
+  //       const { data: fetchedComments }: any = await Axios.get(apiUrl, {
+  //         headers,
+  //       });
+  //       console.log("fetched_comments: ", fetchedComments);
+  //       setCommentList(fetchedComments);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
+  //   fetchData();
+  // }, []);
 
   const addComment = async () => {
     const response = await Axios.post(
@@ -39,7 +40,7 @@ export default function PostCommentList({ postId }: any) {
     );
     console.log("comment add success. response: ", response);
     setCommentContent("");
-    setCommentList((prevState) => {
+    setCommentList((prevState: Object[]) => {
       return [response.data].concat(prevState);
     });
   };
@@ -47,9 +48,13 @@ export default function PostCommentList({ postId }: any) {
   return (
     <>
       <div className="comment-list">
-        {console.log("render with commentList: ", commentList)}
-        {commentList.map((comment) => (
-          <PostComment comment={comment} setCommentList={setCommentList} />
+        {/* {console.log("render with commentList: ", commentList)} */}
+        {commentList.map((comment: any) => (
+          <PostComment
+            key={comment.id}
+            comment={comment}
+            setCommentList={setCommentList}
+          />
         ))}
       </div>
       <div

@@ -6,11 +6,14 @@ from django.utils import timezone, timesince
 from django.views.generic import View
 from datetime import timedelta, datetime
 from rest_framework import status
+from rest_framework import pagination
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     ListCreateAPIView,
+    RetrieveDestroyAPIView,
     RetrieveUpdateDestroyAPIView,
     GenericAPIView,
     DestroyAPIView,
@@ -26,34 +29,16 @@ from .serializers import (
     PredictImageSerializer,
     SpeciesDictSerializer,
     MyCollectionSerializer,
+    MyPostSerializer,
 )
 import json
 
-import tensorflow as tf
+# TODO: Make Async Prediction Server using FastAPI
+# import tensorflow as tf
 import numpy as np
 from PIL import Image
 
-# from rest_framework.viewsets import ModelViewSet
-
-# Create your views here.
-
-# Post ViewSet 요구사항
-# (1): create시 author는 request.user가 되도록 해야함
-#      -> perform_create 오버라이드
-# (2): relatinal field가 있는 경우 eager loading해줘야 함
-#      -> select_related, prefetch_related
-# (3): 필터링: 본인 게시물, 팔로우유저 게시물, 7일 이내
-#      -> get_queryset 오버라이드
-# (4): serializer에서 유저가 like한 포스팅인지 확인해야 하므로 시리얼라이저에 request 정보 필요
-#      ->serializer_context["request"]에 request정보 넣어주기
-# --- 여기까지 강의에서 제공 ---
-# (5): pagination -> paginator class 지정
-
-
-# class PostViewSet(ModelViewSet):
-#     pass
-
-tf_model = tf.keras.models.load_model("v0.0.2_over100(327 species)_Oct.18.1107.h5")
+# tf_model = tf.keras.models.load_model("v0.0.2_over100(327 species)_Oct.18.1107.h5")
 
 species_info = (
     Species.objects.all()
@@ -82,12 +67,30 @@ species_info_dict2 = {
 print(species_info_dict)
 
 
+class StandardResultsSetPagination(pagination.PageNumberPagination):
+    page_size = 18
+    page_size_query_param = "page_size"
+    max_page_size = 20
+
+
+class MyPostPagination(pagination.PageNumberPagination):
+    page_size = 18
+    page_size_query_param = "page_size"
+    max_page_size = 20
+
+
 class MyPostListView(ListAPIView):
-    queryset = Post.objects.all().prefetch_related("photo_set")
-    serializer_class = ""
+    queryset = (
+        Post.objects.all()
+        .select_related("subject_species")
+        .prefetch_related("photo_set", "comment_set")
+    )
+    serializer_class = MyPostSerializer
+    pagination_class = MyPostPagination
 
     def get_queryset(self):
         qs = super().get_queryset()
+        qs = qs.filter(author=self.request.user)
         return qs
 
 
@@ -104,6 +107,7 @@ class PostListCreateView(ListCreateAPIView):
     # .filter() #subquery로 특정 post의 like_user_set을 일부만.
 
     serializer_class = PostSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         # 캐싱된 .all() 에서 필터링하여 사용하기 위해 오버라이드.
@@ -265,42 +269,42 @@ class CommentDestroyAPIView(DestroyAPIView):
         # return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PredictSpeciesAPIView(GenericAPIView):
-    serializer_class = PredictImageSerializer
+# class PredictSpeciesAPIView(GenericAPIView):
+#     serializer_class = PredictImageSerializer
 
-    def post(self, request, *args, **kwargs):
-        image_to_classify = request.data.get("file").file
-        image_to_classify_PIL = (
-            Image.open(image_to_classify).convert("RGB").resize((456, 456))
-        )
-        nd_array = np.expand_dims(np.array(image_to_classify_PIL) / 255.0, axis=0)
-        result = tf_model.predict(nd_array)
-        # result_index = result.argmax(axis=1)[0] + 1
-        # if (538 <= result_index <= 590) or result_index in [593, 594, 595]:
-        #     result_index = 600  # no-bird
-        # result_index = "AV_000" + f"{result_index:0>3}"
-        # print("result_index:", result_index)
+#     def post(self, request, *args, **kwargs):
+#         image_to_classify = request.data.get("file").file
+#         image_to_classify_PIL = (
+#             Image.open(image_to_classify).convert("RGB").resize((456, 456))
+#         )
+#         nd_array = np.expand_dims(np.array(image_to_classify_PIL) / 255.0, axis=0)
+#         result = tf_model.predict(nd_array)
+#         # result_index = result.argmax(axis=1)[0] + 1
+#         # if (538 <= result_index <= 590) or result_index in [593, 594, 595]:
+#         #     result_index = 600  # no-bird
+#         # result_index = "AV_000" + f"{result_index:0>3}"
+#         # print("result_index:", result_index)
 
-        result_top3 = (
-            np.argsort(result, axis=1)[0, ::-1][:3] + 1
-        )  # add 1 to each elements
-        print("result_top3: ", result_top3)
-        result_top3_index = [
-            "AV_000600"
-            if (538 <= result <= 590) or result in [593, 594, 595]
-            else "AV_000" + f"{result:0>3}"
-            for result in result_top3
-        ]
-        # result_top3_dict = [species_info_dict[i] for i in result_top3_index]
+#         result_top3 = (
+#             np.argsort(result, axis=1)[0, ::-1][:3] + 1
+#         )  # add 1 to each elements
+#         print("result_top3: ", result_top3)
+#         result_top3_index = [
+#             "AV_000600"
+#             if (538 <= result <= 590) or result in [593, 594, 595]
+#             else "AV_000" + f"{result:0>3}"
+#             for result in result_top3
+#         ]
+#         # result_top3_dict = [species_info_dict[i] for i in result_top3_index]
 
-        return Response(
-            data=result_top3_index,  # result_top3_dict,
-            # data = {
-            #     "common_name_KOR": species_instance.common_name_KOR,
-            #     "scientific_name": species_instance.genus + " " + species.specific_name,
-            # },
-            status=status.HTTP_202_ACCEPTED,
-        )
+#         return Response(
+#             data=result_top3_index,  # result_top3_dict,
+#             # data = {
+#             #     "common_name_KOR": species_instance.common_name_KOR,
+#             #     "scientific_name": species_instance.genus + " " + species.specific_name,
+#             # },
+#             status=status.HTTP_202_ACCEPTED,
+#         )
 
 
 class BirdDictAPIView(GenericAPIView):

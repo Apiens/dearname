@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+import re
 
 User = get_user_model()
 
@@ -29,3 +30,25 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "password", "email"]  # pk 대신 id써도 됨.
+
+
+class SuggestionUserSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField("get_avatar_url")
+
+    def get_avatar_url(self, author):
+        # Host주소를 아는 경우
+        if re.match(r"^https?://", author.avatar_url):
+            # same as
+            # author.profile_img_url.startswith("http://") or
+            # author.profile_img_url.startswith("https://")
+            return author.avatar_url
+
+        # Host주소를 모르는 경우 -> request정보가 필요
+        if "request" in self.context:
+            scheme = self.context["request"].scheme  # "http" or "https"
+            host = self.context["request"].get_host()
+            return scheme + "://" + host + author.avatar_url
+
+    class Meta:
+        model = User
+        fields = ["username", "name", "avatar_url"]

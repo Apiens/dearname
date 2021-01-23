@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import useAxios from "axios-hooks";
 import PostCommentList from "./PostCommentList";
 import PostPhotoList from "./PostPhotoList";
-import { Avatar } from "antd";
+import { Avatar, Spin } from "antd";
 import { LikeOutlined } from "@ant-design/icons";
 import { useAppContext } from "store";
 import "./Post.scss";
@@ -16,27 +16,33 @@ export default function Post({ post }: any) {
   const headers = { Authorization: `JWT ${jwtToken}` };
 
   const {
+    id: postId,
     author,
     caption,
     location,
-    created_at,
-    updated_at,
+    // created_at,
+    // updated_at,
     subject_species,
+    comment_set,
+    photo_set,
     is_like,
+    // like_user_set,
     like_user_count,
-    id: postId,
+    like_following_user_set,
   } = post;
+
   const [isLike, setIsLike] = useState(is_like);
   const [likeUserCount, setLikeUserCount] = useState(like_user_count);
+
   // const postId = post.id;
   //   console.log("postId: ", postId);
   //   console.log(post);
   //   console.log(author, caption);
   const apiUrl = "http://localhost:8000/api/posts/";
-  const [{ data, loading, error }, refetch] = useAxios({
-    url: apiUrl,
-    headers,
-  });
+  // const [{ data, loading, error }, refetch] = useAxios({
+  //   url: apiUrl,
+  //   headers,
+  // });
 
   const handleLike = async ({ isLike }: any) => {
     console.log("Clicked Like button. isLike is:", isLike);
@@ -48,7 +54,7 @@ export default function Post({ post }: any) {
         setLikeUserCount(likeUserCount - 1);
         console.log("unlike successful. response:", response);
       } else {
-        const response = await Axios.post(likeAPIUrl, data, { headers });
+        const response = await Axios.post(likeAPIUrl, {}, { headers });
         setIsLike(!isLike);
         setLikeUserCount(likeUserCount + 1);
         console.log("like successful. response:", response);
@@ -64,7 +70,7 @@ export default function Post({ post }: any) {
 
   return (
     <article className="post-card">
-      {console.log("rendering post with postId:", postId)}
+      {/* {console.log("rendering post with postId:", postId)} */}
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <span>
           <Avatar src={author.avatar_url} />
@@ -76,9 +82,9 @@ export default function Post({ post }: any) {
         </span>
         <span>at {location}</span>
       </div>
-      {console.log("created at", created_at)}
+      {/* {console.log("created at", created_at)} */}
       <div>
-        <PostPhotoList postId={postId} />
+        <PostPhotoList photo_set={photo_set} postId={postId} />
       </div>
       <div className="card-action">
         <span
@@ -88,10 +94,18 @@ export default function Post({ post }: any) {
         >
           {isLike ? <UnlikeIcon /> : <LikeIcon />}
         </span>
-        <span>{likeUserCount} likes</span>
+        <span>
+          {/* Q: Why it doesn't work? */}
+          {/* {like_following_user_set === []
+            ? ""
+            : JSON.stringify(
+                like_following_user_set.map((user: any) => user.username)
+              ) + "외 "} */}
+          {likeUserCount} 명이 좋아합니다.
+        </span>
       </div>
       <div className="card-caption">{caption}</div>
-      <PostCommentList postId={postId} />
+      <PostCommentList comment_set={comment_set} postId={postId} />
       <br />
     </article>
   );

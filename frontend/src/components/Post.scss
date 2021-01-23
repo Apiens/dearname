@@ -13,12 +13,16 @@
   width: 600px;
   height: 600px;
 }
-
+.slick-next:before,
+.slick-prev:before {
+  color: #001529;
+}
 .slick-prev {
   left: 0px;
   z-index: 2;
 }
 .slick-next {
+  color: #001529;
   right: 0px;
 }
 .slick-dots {

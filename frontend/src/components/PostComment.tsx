@@ -27,7 +27,7 @@ export default function PostComment({ comment, setCommentList }: any) {
   return (
     <div>
       <span style={{ fontWeight: "bold" }}>{comment.author.username} </span>
-      {console.log("comment data: ", comment)}
+      {/* {console.log("comment data: ", comment)} */}
       <span>{comment.message}</span>
       {comment.is_author && (
         <span
