@@ -125,7 +125,7 @@ export default function Login() {
             >
               Log in
             </Button>
-            Or <Link to="/signup">register now!</Link>
+            Or <Link to="/accounts/signup">register now!</Link>
           </Form.Item>
         </Form>
       </Card>

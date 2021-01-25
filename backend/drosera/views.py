@@ -197,7 +197,16 @@ class PostListCreateView(ListCreateAPIView):
 
 
 class PostRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # permission check. Q: Can this checked by rest_framework.permission? (by assigning permission class.)
+        if self.request.user == instance.author:
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PostLikeCreateDestroyView(GenericAPIView):

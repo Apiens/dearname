@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import useAxios from "axios-hooks";
-import { Card, Spin } from "antd";
+import Axios from "axios";
+import { Button, Card, Spin, message } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useAppContext } from "store";
 import "./UserMain.scss";
+import UserPostCard from "components/UserPostCard";
 
 const { Meta } = Card;
 export default function UserProfile() {
@@ -17,8 +19,6 @@ export default function UserProfile() {
     url: apiUrl,
     headers,
   });
-  console.log("data", data);
-  console.log("error", error);
 
   useEffect(() => {
     console.log("useEffect from PostList");
@@ -33,25 +33,6 @@ export default function UserProfile() {
     </div>
   ) : (
     <div>
-      {/* <div
-        style={{
-          width: "100%",
-          height: "20px",
-          borderBottom: "1px solid black",
-          marginBottom: "20px",
-          textAlign: "center",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "20px",
-            backgroundColor: "#F3F5F6",
-            padding: "0 10px",
-          }}
-        >
-          내 게시물
-        </span>
-      </div> */}
       <hr></hr>
       <div
         style={{
@@ -62,52 +43,12 @@ export default function UserProfile() {
         }}
       >
         {postList.map((post: any) => (
-          <Card
-            hoverable
-            style={{ width: "260px" }}
-            cover={
-              <div>
-                <img
-                  width="260px"
-                  height="260px"
-                  alt="example"
-                  src={post.photo_set[0].url}
-                  // "https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-                />
-                <div
-                  style={{
-                    paddingLeft: "10px",
-                    paddingRight: "10px",
-                    width: "260px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <div>{post.created_at.slice(0, 10)}</div>
-                  <div>{post.like_user_count + " 좋아요"}</div>
-                  <div>{post.comment_count + " 댓글"}</div>
-                </div>
-              </div>
-            }
-            actions={[<DeleteOutlined key="delete" />]}
-          >
-            <p
-              style={{
-                fontWeight: "bold",
-                textAlign: "center",
-                fontSize: "1.2rem",
-                margin: "0",
-              }}
-            >
-              {post.subject_species.common_name_KOR}
-            </p>
-            {/* <hr></hr> */}
-            {/* <Meta
-              style={{ textAlign: "center" }}
-              title={post.subject_species.common_name_KOR}
-              // description="www.instagram.com"
-            /> */}
-          </Card>
+          <UserPostCard
+            key={post.id}
+            post={post}
+            setPostList={setPostList}
+            headers={headers}
+          />
         ))}
       </div>
     </div>

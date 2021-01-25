@@ -22,6 +22,13 @@ class FollowSuggestionListAPIView(ListAPIView):
     serializer_class = SuggestionUserSerializer
     queryset = get_user_model().objects.all()
 
+    def get_queryset(self):
+        user = self.request.user
+        qs = super().get_queryset().exclude(id=user.id)
+        qs = qs.difference(user.following_set.all())
+        # # print([i for i in qs])
+        return qs
+
 
 @api_view(["POST"])
 def user_follow(request):
