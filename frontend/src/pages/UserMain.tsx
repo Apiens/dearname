@@ -4,11 +4,8 @@ import { Card, Spin } from "antd";
 import { useAppContext } from "store";
 import "./UserMain.scss";
 import UserPostCard from "components/UserPostCard";
-// import { useLocation } from "react-router-dom";
 
 export default function UserProfile() {
-  // const location = useLocation();
-  // const { from }: any = location.state; // if from "postCreate" => refresh (refetch?) ..??
   const [postList, setPostList] = useState([]);
   const apiUrl = "/api/myposts";
   const {

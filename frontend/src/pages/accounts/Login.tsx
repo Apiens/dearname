@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Axios from "axios";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { useAppContext, setToken } from "store";
 import { parseErrorMessages } from "utils/forms";
@@ -7,6 +6,7 @@ import { Form, Input, Button, Checkbox, notification, Card } from "antd";
 import { SmileOutlined, FrownOutlined } from "@ant-design/icons";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import "./Login.scss";
+import { axiosInstance } from "api";
 
 export default function Login() {
   // to save in local
@@ -30,10 +30,7 @@ export default function Login() {
 
     async function fn() {
       try {
-        const response = await Axios.post(
-          "http://localhost:8000/accounts/token/",
-          data
-        );
+        const response = await axiosInstance.post("/accounts/token/", data);
         const {
           data: { token: jwtToken },
         } = response;

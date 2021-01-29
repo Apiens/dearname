@@ -1,18 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 export default function PostPhotoList({ postId, photo_set }: any) {
-  // const {
-  //   store: { jwtToken },
-  // } = useAppContext();
-  // const headers = { Authorization: `JWT ${jwtToken}` };
-  // const apiUrl = `http://localhost:8000/api/posts/${postId}/photos/`;
-
-  // const [photoList, setPhotoList] = useState([]);
-  const [photoList, setPhotoList] = useState(photo_set);
-
   // carousel settings
   const settings = {
     dots: true,
@@ -24,28 +15,10 @@ export default function PostPhotoList({ postId, photo_set }: any) {
     // adaptiveHeight: true,
   };
 
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     try {
-  //       const { data: photos }: any = await Axios.get(apiUrl, { headers });
-  //       console.log("photos: ", photos);
-  //       setPhotoList(photos);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  //   fetchData();
-  // }, []);
-
-  //   const [{ data: photos, loading }] = useAxios(apiUrl);
-  //   useEffect(() => {
-  //     setPhotoList(photos);
-  //   }, [photos]);
-
   return (
     <div>
       <Slider {...settings}>
-        {photoList.map((photo: any) => {
+        {photo_set.map((photo: any) => {
           return (
             <div>
               <img
@@ -63,6 +36,3 @@ export default function PostPhotoList({ postId, photo_set }: any) {
     </div>
   );
 }
-//       {/* <h4>PostPhotoList</h4> */}
-//       {/* {console.log("rendering photolist with photoList: ", photoList)} */}
-//       {/* {console.log("rendering photolist with loading: ", loading)} */}

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Slider from "react-slick";
 import { useAppContext } from "store";
-import Axios from "axios";
 import { axiosInstance, useAxios } from "api";
 import FollowSuggestion from "components/FollowSuggestion";
 
@@ -31,7 +30,6 @@ export default function FollowSuggestionList() {
   });
 
   useEffect(() => {
-    console.log("useEffect from PostList");
     if (!originalUserList) {
       setsuggestionList([]);
     } else {
@@ -71,8 +69,6 @@ export default function FollowSuggestionList() {
       <p style={{ textAlign: "center", color: "gray" }}>
         주변 사람들을 알아보세요
       </p>
-      {console.log("originalUserList", originalUserList)}
-      {console.log("suggestionList", suggestionList)}
       <Slider {...settings}>
         {suggestionList &&
           suggestionList.map((suggestionUser: any) => {

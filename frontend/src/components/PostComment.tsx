@@ -1,6 +1,5 @@
 import React from "react";
 import { axiosInstance } from "api";
-import { Comment, Button } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useAppContext } from "store";
 
@@ -27,7 +26,6 @@ export default function PostComment({ comment, setCommentList }: any) {
   return (
     <div>
       <span style={{ fontWeight: "bold" }}>{comment.author.username} </span>
-      {/* {console.log("comment data: ", comment)} */}
       <span>{comment.message}</span>
       {comment.is_author && (
         <span
@@ -39,5 +37,4 @@ export default function PostComment({ comment, setCommentList }: any) {
       )}
     </div>
   );
-  // return <Comment content={comment} />;
 }

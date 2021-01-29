@@ -62,18 +62,16 @@ export default function UserCollections() {
           headers,
         })
         .then((response) => {
-          // console.log("birdDict fetched_data. response:", response);
-          // console.log("birdDict fetched_data", response.data);
           return response.data;
         })
         .catch((error) => {
           message.info(
             "종 목록을 불러오는데 실패했습니다. 페이지를 새로고침(F5) 해 주세요."
           );
-          console.log(
-            "error while fetching birdDict. error.response: ",
-            error.response
-          );
+          // console.log(
+          //   "error while fetching birdDict. error.response: ",
+          //   error.response
+          // );
         });
       setBirdDict2(fetched_birdDict);
     };
@@ -85,12 +83,12 @@ export default function UserCollections() {
       try {
         const { data } = await axiosInstance.get(apiUrl, { headers });
         setMyCollection(data);
-        console.log("data_for mycollection: ", data);
+        // console.log("data_for mycollection: ", data);
       } catch (error) {
-        console.log(
-          "Error while fetching data. error.response: ",
-          error.response
-        );
+        // console.log(
+        //   "Error while fetching data. error.response: ",
+        //   error.response
+        // );
       }
     };
     fx();
@@ -159,11 +157,6 @@ export default function UserCollections() {
         className="my_book"
         style={{
           width: "100%",
-          // display: "grid",
-          // gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
-          // gap: "1 em",
-          // justifyItems: "center",
-          // justifyItems: "center",
           display: "flex",
           flexWrap: "wrap",
           flexFlow: "row wrap",
@@ -199,24 +192,6 @@ export default function UserCollections() {
                       : { filter: "grayscale(100%)" }
                   }
                 />
-                {/* {JSON.stringify(
-                  myCollection
-                    .map(
-                      (species: any) =>
-                        species.species < 536 && birdDict2[species.species]
-                    )
-                    .map((bird) => bird[2])
-                )} */}
-                {/* <i>
-                  {JSON.stringify(
-                    Object.values(birdDict2).filter(
-                      (bird) => bird[2] === speciesKOR
-                    )[0] &&
-                      Object.values(birdDict2).filter(
-                        (bird) => bird[2] === speciesKOR
-                      )[0][5]
-                  )}
-                </i> */}
                 <span>
                   <strong>{speciesKOR}</strong>
                 </span>
@@ -263,7 +238,6 @@ export default function UserCollections() {
       >
         {myCollection &&
           myCollection.map((species: any, index: number) => {
-            // console.log("species", species);
             return (
               birdDict2[species.species][4] < 536 && (
                 <article style={{ display: "flex", flexDirection: "column" }}>
@@ -271,20 +245,16 @@ export default function UserCollections() {
                     alt={birdDict2[species.species][2] + "_image"}
                     height="120px"
                     width="150px"
-                    src={"http://" + birdDict2[species.species][5]} //"https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
+                    src={"http://" + birdDict2[species.species][5]}
                   />
                   <span>
                     <strong>{birdDict2[species.species][2]}</strong>
                     <span style={{ float: "right" }}>{species.count}회</span>
-                    {/* <p>{species.count}번 만났습니다.</p> */}
                   </span>
                 </article>
               )
             );
           })}
-        {/* <div style={{ height: "120px", width: "150px" }}></div>
-        <div style={{ height: "120px", width: "150px" }}></div>
-        <div style={{ height: "120px", width: "150px" }}></div> */}
         <i aria-hidden="true"></i>
         <i aria-hidden="true"></i>
         <i aria-hidden="true"></i>
@@ -292,11 +262,4 @@ export default function UserCollections() {
       </section>
     </main>
   );
-}
-
-{
-  /* <div>
-{birdDict2[species.species][2]}, {species.count}
-<img src={birdDict2[species.species][5]} alt="asdf" />
-</div> */
 }

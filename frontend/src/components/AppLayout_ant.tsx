@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { Layout, Menu } from "antd";
+import { Menu } from "antd";
 import "./AppLayout_ant.scss";
 import {
   FormOutlined,

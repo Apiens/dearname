@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import PostComment from "./PostComment";
 import { useAppContext } from "store";
 import { Input, Button } from "antd";
@@ -9,28 +9,9 @@ export default function PostCommentList({ postId, comment_set }: any) {
     store: { jwtToken },
   } = useAppContext();
   const headers = { Authorization: `JWT ${jwtToken}` };
-
-  // const [commentList, setCommentList] = useState([
-  //   { author: { username: "", avatar_url: "" }, id: 0, message: "" },
-  // ]);
   const [commentList, setCommentList] = useState(comment_set);
   const [commentContent, setCommentContent] = useState("");
-
   const apiUrl = `/api/posts/${postId}/comments/`;
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     try {
-  //       const { data: fetchedComments }: any = await Axios.get(apiUrl, {
-  //         headers,
-  //       });
-  //       console.log("fetched_comments: ", fetchedComments);
-  //       setCommentList(fetchedComments);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  //   fetchData();
-  // }, []);
 
   const addComment = async () => {
     const response = await axiosInstance.post(
@@ -48,7 +29,6 @@ export default function PostCommentList({ postId, comment_set }: any) {
   return (
     <>
       <div className="comment-list">
-        {/* {console.log("render with commentList: ", commentList)} */}
         {commentList.map((comment: any) => (
           <PostComment
             key={comment.id}
