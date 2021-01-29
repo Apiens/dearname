@@ -1,9 +1,7 @@
-import Axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { useAppContext } from "store";
 
 export default function PostPhotoList({ postId, photo_set }: any) {
   // const {

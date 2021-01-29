@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import Axios from "axios";
 import { useHistory } from "react-router-dom";
 import { parseErrorMessages } from "utils/forms";
 import { Form, Input, Button, notification, Card } from "antd";
 import { SmileOutlined, FrownOutlined, MailOutlined } from "@ant-design/icons";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import "./Signup.scss";
+import { axiosInstance } from "api";
 
 export default function Signup() {
   // for redirection after signup
@@ -26,10 +26,7 @@ export default function Signup() {
     async function fn() {
       //signup
       try {
-        const response = await Axios.post(
-          "http://localhost:8000/accounts/signup/",
-          data
-        );
+        const response = await axiosInstance.post("/accounts/signup/", data);
         console.log("signup success. response: ", response);
         notification.open({
           message: "회원가입 성공",

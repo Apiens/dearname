@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import Axios from "axios";
-import { Button, Card, Spin, message } from "antd";
+import React from "react";
+import { Button, Card, message } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
+import { axiosInstance } from "api";
 
 export default function UserPostCard({ post, setPostList, headers }: any) {
   //   const handleDelete = () => {
@@ -11,10 +11,9 @@ export default function UserPostCard({ post, setPostList, headers }: any) {
   //   };
   const deletePost = async () => {
     try {
-      const response = await Axios.delete(
-        `http://localhost:8000/api/posts/${post.id}/`,
-        { headers }
-      );
+      const response = await axiosInstance.delete(`/api/posts/${post.id}/`, {
+        headers,
+      });
       console.log("delete success. response: ", response);
       message.info("게시물을 성공적으로 삭제 하였습니다.");
       setPostList((prevList: any) =>

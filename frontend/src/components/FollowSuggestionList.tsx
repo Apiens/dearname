@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Slider from "react-slick";
-import { Card, Button, Spin } from "antd";
 import { useAppContext } from "store";
 import Axios from "axios";
-import useAxios from "axios-hooks";
+import { axiosInstance, useAxios } from "api";
 import FollowSuggestion from "components/FollowSuggestion";
 
-const { Meta } = Card;
 export default function FollowSuggestionList() {
   const [suggestionList, setsuggestionList] = useState<Object[]>([]);
 
@@ -22,7 +20,7 @@ export default function FollowSuggestionList() {
     adaptiveHeight: true,
   };
 
-  const apiUrl = "http://localhost:8000/accounts/suggestions";
+  const apiUrl = "/accounts/suggestions";
   const {
     store: { jwtToken },
   } = useAppContext();
@@ -46,7 +44,8 @@ export default function FollowSuggestionList() {
   const onFollowUser = (username: any) => {
     const data = { username };
     const config = { headers };
-    Axios.post("http://localhost:8000/accounts/follow/", data, config)
+    axiosInstance
+      .post("/accounts/follow/", data, config)
       .then((response) => {
         setsuggestionList((prevUserList) =>
           prevUserList.map((user: any) =>

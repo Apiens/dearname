@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from "react";
-import Slider from "react-slick";
-import { Card, Button, Spin } from "antd";
-import { useAppContext } from "store";
-import useAxios from "axios-hooks";
+import React from "react";
+import { Card, Button } from "antd";
 
-const { Meta } = Card;
 export default function FollowSuggestion({
   suggestionUser,
   onFollowUser,

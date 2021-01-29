@@ -1,21 +1,24 @@
-import React, { useState, useEffect } from "react";
-import Axios from "axios";
+import React, { useState, useEffect, useMemo } from "react";
+import { axiosInstance } from "api";
 import { useAppContext } from "store";
-import { Card, message } from "antd";
+import { message } from "antd";
 import "./UserCollections.scss";
 
 interface dict {
   [key: string]: any;
 }
-const { Meta } = Card;
 export default function UserCollections() {
   const [myCollection, setMyCollection] = useState<Object[]>([]);
   const [birdDict2, setBirdDict2] = useState<dict>({});
-  const apiUrl = "http://localhost:8000/api/mycollection";
+  const apiUrl = "/api/mycollection";
   const {
     store: { jwtToken },
   } = useAppContext();
-  const headers = { Authorization: `JWT ${jwtToken}` };
+  // const headers = { Authorization: `JWT ${jwtToken}` };
+  const headers = useMemo(() => {
+    return { Authorization: `JWT ${jwtToken}` };
+  }, [jwtToken]);
+
   // const { data: originalMyCollection }: any = Axios.get(apiUrl, { headers });
   // console.log("originalMyCollection: ", originalMyCollection);
 
@@ -54,12 +57,10 @@ export default function UserCollections() {
 
   useEffect(() => {
     const fx = async () => {
-      const fetched_birdDict = await Axios.get(
-        "http://localhost:8000/api/bird_dict2",
-        {
+      const fetched_birdDict = await axiosInstance
+        .get("/api/bird_dict2", {
           headers,
-        }
-      )
+        })
         .then((response) => {
           // console.log("birdDict fetched_data. response:", response);
           // console.log("birdDict fetched_data", response.data);
@@ -77,13 +78,14 @@ export default function UserCollections() {
       setBirdDict2(fetched_birdDict);
     };
     fx();
-  }, []);
+  }, [headers]);
 
   useEffect(() => {
     const fx = async () => {
       try {
-        const { data } = await Axios.get(apiUrl, { headers });
+        const { data } = await axiosInstance.get(apiUrl, { headers });
         setMyCollection(data);
+        console.log("data_for mycollection: ", data);
       } catch (error) {
         console.log(
           "Error while fetching data. error.response: ",
@@ -92,7 +94,7 @@ export default function UserCollections() {
       }
     };
     fx();
-  }, [birdDict2]);
+  }, [birdDict2, headers]);
 
   return (
     <main style={{ width: "100%" }}>

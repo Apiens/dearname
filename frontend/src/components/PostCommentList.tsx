@@ -1,8 +1,8 @@
-import Axios from "axios";
 import React, { useEffect, useState } from "react";
 import PostComment from "./PostComment";
 import { useAppContext } from "store";
 import { Input, Button } from "antd";
+import { axiosInstance } from "api";
 
 export default function PostCommentList({ postId, comment_set }: any) {
   const {
@@ -16,7 +16,7 @@ export default function PostCommentList({ postId, comment_set }: any) {
   const [commentList, setCommentList] = useState(comment_set);
   const [commentContent, setCommentContent] = useState("");
 
-  const apiUrl = `http://localhost:8000/api/posts/${postId}/comments/`;
+  const apiUrl = `/api/posts/${postId}/comments/`;
   // useEffect(() => {
   //   async function fetchData() {
   //     try {
@@ -33,7 +33,7 @@ export default function PostCommentList({ postId, comment_set }: any) {
   // }, []);
 
   const addComment = async () => {
-    const response = await Axios.post(
+    const response = await axiosInstance.post(
       apiUrl,
       { message: commentContent },
       { headers }

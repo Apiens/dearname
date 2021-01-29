@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Axios from "axios";
 import { useAppContext } from "store";
 import { Form, Input, Upload, message, Modal, Button, Select } from "antd";
-import { PlusOutlined, InboxOutlined } from "@ant-design/icons";
+import { InboxOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
 import EXIF from "exif-js";
 import "./PostCreate.scss";
-import { useHistory } from "react-router-dom";
+import { axiosInstance } from "api";
+// import { useHistory } from "react-router-dom";
+import { PREDICT_API_HOST } from "Constants";
 
 function getBase64(file: any) {
   return new Promise((resolve, reject) => {
@@ -64,24 +66,25 @@ export default function PostCreate(this: any, { postId }: any) {
 
   const [form] = Form.useForm();
   // const [headers, setHeaders] = useState({});
-  const history = useHistory();
+  // const history = useHistory();
 
-  const apiUrl = `http://localhost:8000/api/posts/`;
+  const apiUrl = `/api/posts/`;
   const {
     store: { jwtToken },
   } = useAppContext();
-  const headers = { Authorization: `JWT ${jwtToken}` };
+  // const headers = { Authorization: `JWT ${jwtToken}` };
+  const headers = useMemo(() => {
+    return { Authorization: `JWT ${jwtToken}` };
+  }, [jwtToken]);
   // setHeaders({ Authorization: `JWT ${jwtToken}` });
 
   useEffect(() => {
     console.log("useEffect after component mount");
     const fx = async () => {
-      const fetched_birdDict = await Axios.get(
-        "http://localhost:8000/api/bird_dict",
-        {
+      const fetched_birdDict = await axiosInstance
+        .get("/api/bird_dict", {
           headers,
-        }
-      )
+        })
         .then((response) => {
           console.log("birdDict fetched_data. response:", response);
           console.log("birdDict fetched_data", response.data);
@@ -99,7 +102,7 @@ export default function PostCreate(this: any, { postId }: any) {
       setBirdDict(fetched_birdDict);
     };
     fx();
-  }, []);
+  }, [headers]);
 
   // this seems very inefficient but extracting exif in onSubmit didn't work well.
   // also it turns out something happens when uplaod multiple images at once.
@@ -276,7 +279,7 @@ export default function PostCreate(this: any, { postId }: any) {
       });
 
       console.log("entries: ", formData.entries());
-      const response = await Axios.post(
+      const response = await axiosInstance.post(
         apiUrl,
         formData,
         // { caption, location, subject_species_pk, photo_set },
@@ -329,9 +332,9 @@ export default function PostCreate(this: any, { postId }: any) {
       }}
     >
       <Form.Item>
-        <ImgCrop grid rotate quality={0.8}>
+        <ImgCrop grid rotate quality={1.0}>
           <Upload.Dragger
-            action="http://localhost:8000/api/predict/"
+            action={PREDICT_API_HOST + "/predict/birds"}
             headers={headers}
             // multiple={true} // TODO: find a way to enable multiple with ImgCrop.
             listType="picture-card"
@@ -376,7 +379,7 @@ export default function PostCreate(this: any, { postId }: any) {
       <Form.Item>
         <Select
           value={selectedSpecies}
-          allowClear
+          allowClear={true}
           // loading
           optionFilterProp="value"
           showSearch
@@ -412,6 +415,7 @@ export default function PostCreate(this: any, { postId }: any) {
           //     .localeCompare(optionB.children.toLowerCase())
           // }
         >
+          {console.log(JSON.stringify(sortedPrediction))}
           {sortedPrediction.map((prediction: string[], index: number) => {
             return (
               index < 3 && (

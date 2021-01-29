@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { Layout, Menu, Button, Breadcrumb } from "antd";
+import { Layout, Menu } from "antd";
 import "./AppLayout_ant.scss";
 import {
   FormOutlined,
@@ -10,7 +10,6 @@ import {
 import LogoImage from "assets/dearname_icon_white.png";
 import { Link } from "react-router-dom";
 import { useAppContext, deleteToken } from "store";
-const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
 
 type Props = {

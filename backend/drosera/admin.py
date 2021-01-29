@@ -52,15 +52,16 @@ class SpeciesAdmin(admin.ModelAdmin):
     list_display = [
         "id",
         "index",
-        "scientific_name",
+        # "scientific_name",
         "common_name",
         "common_name_KOR",
-        "like_users",
+        # "like_users",
+        "thumbnail",
     ]
-    list_display_links = ["scientific_name"]
+    list_display_links = ["common_name_KOR"]
 
-    def scientific_name(self, species):
-        return f"{species.genus} {species.specific_name}".title()
+    # def scientific_name(self, species):
+    #     return f"{species.genus} {species.specific_name}".title()
 
-    def like_users(self, species):
-        return species.like_user_set.all().count()
+    # def like_users(self, species):
+    #     return species.like_user_set.all().count()

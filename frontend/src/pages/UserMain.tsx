@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
-import useAxios from "axios-hooks";
-import Axios from "axios";
-import { Button, Card, Spin, message } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { useAxios } from "api";
+import { Card, Spin } from "antd";
 import { useAppContext } from "store";
 import "./UserMain.scss";
 import UserPostCard from "components/UserPostCard";
+// import { useLocation } from "react-router-dom";
 
-const { Meta } = Card;
 export default function UserProfile() {
+  // const location = useLocation();
+  // const { from }: any = location.state; // if from "postCreate" => refresh (refetch?) ..??
   const [postList, setPostList] = useState([]);
-  const apiUrl = "http://localhost:8000/api/myposts";
+  const apiUrl = "/api/myposts";
   const {
     store: { jwtToken },
   } = useAppContext();

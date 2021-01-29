@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
-import useAxios from "axios-hooks";
 import PostCommentList from "./PostCommentList";
 import PostPhotoList from "./PostPhotoList";
 import { Avatar, Spin } from "antd";
-import { LikeOutlined } from "@ant-design/icons";
 import { useAppContext } from "store";
 import "./Post.scss";
 import { LikeIcon, UnlikeIcon } from "./icons/CostumIcons";
-import Axios from "axios";
+import { axiosInstance } from "api";
 
 export default function Post({ post }: any) {
   const {
@@ -38,7 +36,6 @@ export default function Post({ post }: any) {
   //   console.log("postId: ", postId);
   //   console.log(post);
   //   console.log(author, caption);
-  const apiUrl = "http://localhost:8000/api/posts/";
   // const [{ data, loading, error }, refetch] = useAxios({
   //   url: apiUrl,
   //   headers,
@@ -46,15 +43,15 @@ export default function Post({ post }: any) {
 
   const handleLike = async ({ isLike }: any) => {
     console.log("Clicked Like button. isLike is:", isLike);
-    const likeAPIUrl = `http://localhost:8000/api/posts/${postId}/like/`;
+    const likeAPIUrl = `/api/posts/${postId}/like/`;
     try {
       if (isLike) {
-        const response = await Axios.delete(likeAPIUrl, { headers });
+        const response = await axiosInstance.delete(likeAPIUrl, { headers });
         setIsLike(!isLike);
         setLikeUserCount(likeUserCount - 1);
         console.log("unlike successful. response:", response);
       } else {
-        const response = await Axios.post(likeAPIUrl, {}, { headers });
+        const response = await axiosInstance.post(likeAPIUrl, {}, { headers });
         setIsLike(!isLike);
         setLikeUserCount(likeUserCount + 1);
         console.log("like successful. response:", response);

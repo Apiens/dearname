@@ -94,10 +94,10 @@ class Photo(models.Model):
 
 
 class Species(models.Model):
-    # main_image = models.ImageField(upload_to="drosera/species_main_img")
+    thumbnail = models.ImageField(upload_to="drosera/species_thumbnail")
     wiki_thumbnail_url = CharField(max_length=1000)
-    common_name = models.CharField(max_length=50, blank=True)
-    common_name_KOR = models.CharField(max_length=50, blank=True)
+    common_name = models.CharField(max_length=50, blank=True, unique=True)
+    common_name_KOR = models.CharField(max_length=50, blank=True, unique=True)
     specific_name = models.CharField(max_length=50)
     genus = models.CharField(max_length=50)
     like_user_set = models.ManyToManyField(
@@ -106,6 +106,13 @@ class Species(models.Model):
     index = models.CharField(max_length=20, blank=True)
     # TODO: which is better?
     # genus = models.ForeignKey("TaxoGenus", on_delete=models.PROTECT)
+
+
+class StampBook(models.Model):
+    title = models.CharField(max_length=100)
+    species_set = models.ManyToManyField(
+        "species", blank=True, related_name="stampbook_set"
+    )
 
 
 # class TaxoGenus(models.Model):

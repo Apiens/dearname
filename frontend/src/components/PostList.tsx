@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import useAxios from "axios-hooks";
+import { useAxios } from "api";
 import { Spin } from "antd";
-import Axios from "axios";
 import Post from "./Post";
 import { useAppContext } from "store";
 import FollowSuggestion from "components/FollowSuggestionList";
 
 export default function PostList() {
   const [postList, setPostList] = useState([]);
-  const apiUrl = "http://localhost:8000/api/posts/";
+  const apiUrl = "/api/posts/";
   const {
     store: { jwtToken },
   } = useAppContext();
