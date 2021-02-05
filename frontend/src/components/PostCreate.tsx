@@ -1,3 +1,5 @@
+// @ts-ignore
+// ts ignore to avoid type error caused by error in library. (exif.d.ts)
 import React, { useState, useEffect, useMemo } from "react";
 import { useAppContext } from "store";
 import { Form, Input, Upload, message, Modal, Button, Select } from "antd";
