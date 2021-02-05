@@ -101,9 +101,11 @@ export default function PostCreate(this: any, { postId }: any) {
   }, [headers]);
 
   const [exifList, setExifList] = useState<Object[]>([]);
+  // @ts-ignore
   useEffect(() => {
     console.log("useEffect after FileList");
     // console.log("file_list: ", fileList);
+    // @ts-ignore
     for (const [index, file] of fileList.entries()) {
       EXIF.getData(file.originFileObj, () => {
         const metaData = EXIF.getAllTags(file.originFileObj);
