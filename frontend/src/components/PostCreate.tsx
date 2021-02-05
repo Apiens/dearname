@@ -1,5 +1,3 @@
-// @ts-ignore
-// ts ignore to avoid type error caused by error in library. (exif.d.ts)
 import React, { useState, useEffect, useMemo } from "react";
 import { useAppContext } from "store";
 import { Form, Input, Upload, message, Modal, Button, Select } from "antd";
@@ -101,12 +99,12 @@ export default function PostCreate(this: any, { postId }: any) {
   }, [headers]);
 
   const [exifList, setExifList] = useState<Object[]>([]);
-  // @ts-ignore
   useEffect(() => {
     console.log("useEffect after FileList");
     // console.log("file_list: ", fileList);
-    // @ts-ignore
     for (const [index, file] of fileList.entries()) {
+      // ts ignore to avoid type error caused by error in library. (exif.d.ts)
+      // @ts-ignore
       EXIF.getData(file.originFileObj, () => {
         const metaData = EXIF.getAllTags(file.originFileObj);
         console.log("index: ", index);
