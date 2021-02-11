@@ -103,7 +103,7 @@ export default function PostCreate(this: any, { postId }: any) {
     console.log("useEffect after FileList");
     // console.log("file_list: ", fileList);
     for (const [index, file] of fileList.entries()) {
-      // ts ignore to avoid type error caused by error in library. (exif.d.ts)
+      // ts ignore to avoid type error caused by error in library. (exif.d.ts )
       // @ts-ignore
       EXIF.getData(file.originFileObj, () => {
         const metaData = EXIF.getAllTags(file.originFileObj);
@@ -235,7 +235,7 @@ export default function PostCreate(this: any, { postId }: any) {
       <Form.Item>
         <ImgCrop grid rotate quality={1.0}>
           <Upload.Dragger
-            action={PREDICT_API_HOST + "/predict/birds"}
+            action={PREDICT_API_HOST + "predict/birds"}
             headers={headers}
             // multiple={true} // TODO: find a way to enable multiple with ImgCrop.
             listType="picture-card"
