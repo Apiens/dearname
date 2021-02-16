@@ -1,0 +1,17 @@
+media
+static
+fast_api_predict
+nginx
+
+.env
+
+v0.0.2_over100(327 species)_Oct.18.1107.h5
+
+*.ipynb
+*.h5
+*/__pycache__
+!*/migrations/__init__.py
+*/migrations/*
+.vscode
+.ipynb_checkpoints
+secrets.json

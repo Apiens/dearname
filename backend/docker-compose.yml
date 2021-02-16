@@ -1,0 +1,45 @@
+version: "3.7"
+services:
+  backend:
+    image: apiens/dearname_be:0.21
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+
+  predict:
+    image: apiens/fastapi_predict:0.1
+    ports:
+      - "8008:8008"
+
+  nginx:
+    image: apiens/nginx_dearname:0.1
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - predict
+# version: "3.7"
+# services:
+#   backend:
+#     env_file:
+#       - .env
+#     build:
+#       context: .
+#     ports:
+#       - "8000:8000"
+
+#   predict:
+#     build:
+#       context: ./fast_api_predict
+#     ports:
+#       - "8008:8008"
+
+#   nginx:
+#     build:
+#       context: ./nginx
+#     ports:
+#       - "80:80"
+#     depends_on:
+#       - backend
+#       - predict

@@ -1,0 +1,12 @@
+Django==3.1.4
+djangorestframework==3.12.2
+djangorestframework-jwt==1.11.0
+django-cors-headers==3.5.0
+django-countries==7.0
+django-pydenticon==0.2
+django-storages==1.11.1
+django-extensions
+boto3==1.17.1
+Pillow==8.0.1
+pytz==2020.4
+gunicorn
