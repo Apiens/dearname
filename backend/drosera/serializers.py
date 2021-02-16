@@ -15,18 +15,22 @@ class AuthorSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField("get_avatar_url")
 
     def get_avatar_url(self, author):
-        # Host주소를 아는 경우
+        # Host주소가 avatar_url에 이미 포함된 경우.
         if re.match(r"^https?://", author.avatar_url):
             # same as
             # author.profile_img_url.startswith("http://") or
             # author.profile_img_url.startswith("https://")
             return author.avatar_url
 
-        # Host주소를 모르는 경우 -> request정보가 필요
+        # avatar_url에 Host정보가 없는경우 -> request정보에서 가져옴.
         if "request" in self.context:
-            scheme = self.context["request"].scheme  # "http" or "https"
-            host = self.context["request"].get_host()
-            return scheme + "://" + host + author.avatar_url
+            # scheme = self.context["request"].scheme  # "http" or "https"
+            # host = self.context["request"].get_host()
+            # return scheme + "://" + host + author.avatar_url
+
+            # 그러나 nginx에서 proxy_pass로 request를 전달하면서 host명을 django로 덮어씀;
+            # 임시방편으로 EC2의 address를 그대로 사용
+            return "http://d16c239m5uwjv8.cloudfront.net" + author.avatar_url
 
     class Meta:
         model = get_user_model()
