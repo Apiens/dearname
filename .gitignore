@@ -1,6 +1,13 @@
+backend/.env
 memo.md
 */*.h5
+*/*/*.h5
+*/*/*.tflite
+*/*/*.ipynb
+
+
 */secrets.json
+!*/*/migrations/
 */*/migrations/*
 */.vscode
 frontend/src/assets/*.png
