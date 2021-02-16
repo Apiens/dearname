@@ -104,10 +104,6 @@ DATABASES = {
         "HOST": "127.0.0.1",
         "PORT": "5432",
     }
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # }
 }
 
 
@@ -167,7 +163,7 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-    "JWT_SECRET_KEY": SECRET_KEY,  # FIXME: JWT_SECRET_KEY
+    "JWT_SECRET_KEY": "12345",  # FIXME: JWT_SECRET_KEY
     "JWT+ALGORITHM": "HS256",
     "JWT_ALLOW_REFRESH": True,
     "JWT_EXPIRATION_DELTA": timedelta(days=7),

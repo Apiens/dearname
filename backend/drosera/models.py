@@ -6,15 +6,6 @@ from django.db.models.fields import CharField
 from django.db.utils import DatabaseError
 
 
-# Post Model 요구사항
-# author - FK, related_name, ondelete=cascade
-# like_user_set - Many_to_Many, related_name
-# caption -> 400자(200byte)
-# photo -> Photo에서 FK로 지정
-# video -> Video에서 FK로 지정
-# comment -> Comment에서 FK로 지정
-
-
 class TimestampedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -69,7 +60,7 @@ class Photo(models.Model):
         on_delete=models.CASCADE,
         null=True,
     )
-    url = models.ImageField(upload_to="drosera/photo/%Y/%m/%d")
+    url = models.ImageField(upload_to="dearname/photo/%Y/%m/%d")
     # Q: url 말고 좋은 필드명은 없을까...? admin.py에서 url.url 쓰려니 이상하네;
     attached_post = models.ForeignKey(
         Post, related_name="photo_set", blank=True, on_delete=models.CASCADE
@@ -94,7 +85,7 @@ class Photo(models.Model):
 
 
 class Species(models.Model):
-    thumbnail = models.ImageField(upload_to="drosera/species_thumbnail")
+    thumbnail = models.ImageField(upload_to="dearname/species_thumbnail")
     wiki_thumbnail_url = CharField(max_length=1000)
     common_name = models.CharField(max_length=50, blank=True, unique=True)
     common_name_KOR = models.CharField(max_length=50, blank=True, unique=True)

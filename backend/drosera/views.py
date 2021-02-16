@@ -34,37 +34,37 @@ from .serializers import (
 import json
 
 # TODO: Make Async Prediction Server using FastAPI
-import tensorflow as tf
-import numpy as np
-from PIL import Image
+# import tensorflow as tf
+# import numpy as np
+# from PIL import Image
 
-tf_model = tf.keras.models.load_model("v0.0.2_over100(327 species)_Oct.18.1107.h5")
+# tf_model = tf.keras.models.load_model("v0.0.2_over100(327 species)_Oct.18.1107.h5")
 
-species_info = (
-    Species.objects.all()
-)  # load table on memory. # loading as a dict will be also effecient.
-species_info_dict = {
-    record.index: [
-        record.index,
-        record.genus + " " + record.specific_name,
-        record.common_name_KOR,
-        record.common_name,
-        record.id,
-    ]
-    for record in species_info
-}
-species_info_dict2 = {
-    record.id: [
-        record.index,
-        record.genus + " " + record.specific_name,
-        record.common_name_KOR,
-        record.common_name,
-        record.id,
-        record.wiki_thumbnail_url,
-    ]
-    for record in species_info
-}
-print(species_info_dict)
+# species_info = (
+#     Species.objects.all()
+# )  # load table on memory. # loading as a dict will be also effecient.
+# species_info_dict = {
+#     record.index: [
+#         record.index,
+#         record.genus + " " + record.specific_name,
+#         record.common_name_KOR,
+#         record.common_name,
+#         record.id,
+#     ]
+#     for record in species_info
+# }
+# species_info_dict2 = {
+#     record.id: [
+#         record.index,
+#         record.genus + " " + record.specific_name,
+#         record.common_name_KOR,
+#         record.common_name,
+#         record.id,
+#         record.wiki_thumbnail_url,
+#     ]
+#     for record in species_info
+# }
+# print(species_info_dict)
 
 
 class StandardResultsSetPagination(pagination.PageNumberPagination):
@@ -278,42 +278,42 @@ class CommentDestroyAPIView(DestroyAPIView):
         # return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PredictSpeciesAPIView(GenericAPIView):
-    serializer_class = PredictImageSerializer
+# class PredictSpeciesAPIView(GenericAPIView):
+#     serializer_class = PredictImageSerializer
 
-    def post(self, request, *args, **kwargs):
-        image_to_classify = request.data.get("file").file
-        image_to_classify_PIL = (
-            Image.open(image_to_classify).convert("RGB").resize((456, 456))
-        )
-        nd_array = np.expand_dims(np.array(image_to_classify_PIL) / 255.0, axis=0)
-        result = tf_model.predict(nd_array)
-        # result_index = result.argmax(axis=1)[0] + 1
-        # if (538 <= result_index <= 590) or result_index in [593, 594, 595]:
-        #     result_index = 600  # no-bird
-        # result_index = "AV_000" + f"{result_index:0>3}"
-        # print("result_index:", result_index)
+#     def post(self, request, *args, **kwargs):
+#         image_to_classify = request.data.get("file").file
+#         image_to_classify_PIL = (
+#             Image.open(image_to_classify).convert("RGB").resize((456, 456))
+#         )
+#         nd_array = np.expand_dims(np.array(image_to_classify_PIL) / 255.0, axis=0)
+#         result = tf_model.predict(nd_array)
+#         # result_index = result.argmax(axis=1)[0] + 1
+#         # if (538 <= result_index <= 590) or result_index in [593, 594, 595]:
+#         #     result_index = 600  # no-bird
+#         # result_index = "AV_000" + f"{result_index:0>3}"
+#         # print("result_index:", result_index)
 
-        result_top3 = (
-            np.argsort(result, axis=1)[0, ::-1][:3] + 1
-        )  # add 1 to each elements
-        print("result_top3: ", result_top3)
-        result_top3_index = [
-            "AV_000600"
-            if (538 <= result <= 590) or result in [593, 594, 595]
-            else "AV_000" + f"{result:0>3}"
-            for result in result_top3
-        ]
-        # result_top3_dict = [species_info_dict[i] for i in result_top3_index]
+#         result_top3 = (
+#             np.argsort(result, axis=1)[0, ::-1][:3] + 1
+#         )  # add 1 to each elements
+#         print("result_top3: ", result_top3)
+#         result_top3_index = [
+#             "AV_000600"
+#             if (538 <= result <= 590) or result in [593, 594, 595]
+#             else "AV_000" + f"{result:0>3}"
+#             for result in result_top3
+#         ]
+#         # result_top3_dict = [species_info_dict[i] for i in result_top3_index]
 
-        return Response(
-            data=result_top3_index,  # result_top3_dict,
-            # data = {
-            #     "common_name_KOR": species_instance.common_name_KOR,
-            #     "scientific_name": species_instance.genus + " " + species.specific_name,
-            # },
-            status=status.HTTP_202_ACCEPTED,
-        )
+#         return Response(
+#             data=result_top3_index,  # result_top3_dict,
+#             # data = {
+#             #     "common_name_KOR": species_instance.common_name_KOR,
+#             #     "scientific_name": species_instance.genus + " " + species.specific_name,
+#             # },
+#             status=status.HTTP_202_ACCEPTED,
+#         )
 
 
 class BirdDictAPIView(GenericAPIView):
@@ -321,14 +321,38 @@ class BirdDictAPIView(GenericAPIView):
     # serializer_class = SpeciesDictSerializer  # doesn't matter because it isn't used
 
     def get(self, request):
+        species_info = (
+            Species.objects.all()
+        )  # load table on memory. # loading as a dict will be also effecient.
+        species_info_dict = {
+            record.index: [
+                record.index,
+                record.genus + " " + record.specific_name,
+                record.common_name_KOR,
+                record.common_name,
+                record.id,
+            ]
+            for record in species_info
+        }
         return Response(data=species_info_dict, status=status.HTTP_200_OK)
 
 
 class BirdDict2APIView(GenericAPIView):
     # queryset = Species.objects.all().prefetch_related("like_user_set")
     # serializer_class = SpeciesDictSerializer  # doesn't matter because it isn't used
-
     def get(self, request):
+        species_info = Species.objects.all()  # load table on memory
+        species_info_dict2 = {
+            record.id: [
+                record.index,
+                record.genus + " " + record.specific_name,
+                record.common_name_KOR,
+                record.common_name,
+                record.id,
+                record.wiki_thumbnail_url,
+            ]
+            for record in species_info
+        }
         return Response(data=species_info_dict2, status=status.HTTP_200_OK)
 
 
