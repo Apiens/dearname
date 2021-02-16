@@ -4,11 +4,6 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { axiosInstance } from "api";
 
 export default function UserPostCard({ post, setPostList, headers }: any) {
-  //   const handleDelete = () => {
-  //     Axios.delete(`http://localhost:8000/api/posts/${post.id}/`, {
-  //       headers,
-  //     }).then(message.info("게시물을 성공적으로 삭제 하였습니다."));
-  //   };
   const deletePost = async () => {
     try {
       const response = await axiosInstance.delete(`/api/posts/${post.id}/`, {

@@ -47,7 +47,7 @@ export default function Signup() {
         }
       }
     }
-    console.log("Success:", values);
+    // console.log("Success:", values);
     fn();
   };
 

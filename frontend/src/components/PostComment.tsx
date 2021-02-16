@@ -13,14 +13,14 @@ export default function PostComment({ comment, setCommentList }: any) {
   const deleteComment = async () => {
     try {
       const response = await axiosInstance.delete(deleteAPIUrl, { headers });
-      console.log("delete success. response: ", response);
+      // console.log("delete success. response: ", response);
       setCommentList((prevList: any) =>
         prevList.filter((element: any) => {
           return element.id !== comment.id;
         })
       );
     } catch (error) {
-      console.log("error.response: ", error.response);
+      // console.log("error.response: ", error.response);
     }
   };
   return (

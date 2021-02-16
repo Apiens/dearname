@@ -33,28 +33,21 @@ export default function Post({ post }: any) {
   const [likeUserCount, setLikeUserCount] = useState(like_user_count);
 
   const handleLike = async ({ isLike }: any) => {
-    console.log("Clicked Like button. isLike is:", isLike);
     const likeAPIUrl = `/api/posts/${postId}/like/`;
     try {
       if (isLike) {
         const response = await axiosInstance.delete(likeAPIUrl, { headers });
         setIsLike(!isLike);
         setLikeUserCount(likeUserCount - 1);
-        console.log("unlike successful. response:", response);
       } else {
         const response = await axiosInstance.post(likeAPIUrl, {}, { headers });
         setIsLike(!isLike);
         setLikeUserCount(likeUserCount + 1);
-        console.log("like successful. response:", response);
       }
     } catch (error) {
       console.log("error.response: ", error.response);
     }
   };
-
-  useEffect(() => {
-    console.log("isLike Changed to:", isLike);
-  }, [isLike]);
 
   return (
     <article className="post-card">

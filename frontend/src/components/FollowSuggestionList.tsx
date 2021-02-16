@@ -68,7 +68,6 @@ export default function FollowSuggestionList() {
 
   return (
     <section>
-      {/* style={{ border: "3px solid #bcbcbc", borderRadius: "5px" }} */}
       <p style={{ textAlign: "center", color: "gray" }}>
         주변 사람들을 알아보세요
       </p>

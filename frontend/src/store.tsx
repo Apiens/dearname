@@ -33,8 +33,8 @@ export const AppProvider = ({ children }: any) => {
   });
 
   useEffect(() => {
-    console.log("'store' changed");
-    console.log("store: ", store);
+    // console.log("'store' changed");
+    // console.log("store: ", store);
     const { jwtToken } = store;
     setStorageItem("jwtToken", jwtToken);
   }, [store]);

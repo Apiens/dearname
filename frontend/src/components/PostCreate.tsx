@@ -210,9 +210,6 @@ export default function PostCreate(this: any, { postId }: any) {
     console.log("l,s,c:", location, subject_species_pk, caption);
   }, [location, subject_species_pk, caption]);
 
-  // TODO: Dragger를 통한 multiupload와 함께 Cropper 기능 제공.
-  // (picture-card list에 등록되기 전 cropper로 선처리)
-  // Dragger에 multi image 등록시 작동 순서. before upload-> picture-card -> fileList ...?
   useEffect(() => {
     const sorted = Object.entries(speciesPrediction).sort(
       ([, a], [, b]) => b - a // reverse of a-b

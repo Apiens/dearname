@@ -14,13 +14,9 @@ export default function UserCollections() {
   const {
     store: { jwtToken },
   } = useAppContext();
-  // const headers = { Authorization: `JWT ${jwtToken}` };
   const headers = useMemo(() => {
     return { Authorization: `JWT ${jwtToken}` };
   }, [jwtToken]);
-
-  // const { data: originalMyCollection }: any = Axios.get(apiUrl, { headers });
-  // console.log("originalMyCollection: ", originalMyCollection);
 
   const noviceBook = [
     "청둥오리",
@@ -83,24 +79,13 @@ export default function UserCollections() {
       try {
         const { data } = await axiosInstance.get(apiUrl, { headers });
         setMyCollection(data);
-        // console.log("data_for mycollection: ", data);
-      } catch (error) {
-        // console.log(
-        //   "Error while fetching data. error.response: ",
-        //   error.response
-        // );
-      }
+      } catch (error) {}
     };
     fx();
   }, [birdDict2, headers]);
 
   return (
     <main style={{ width: "100%" }}>
-      {/* <div style={{width: "100%", height: "20px", border-bottom: "1px solid black", text-align: "center"}}>
-        <span style={{font-size: 40px" background-color: "#F3F5F6", padding: "0 10px"}}>
-          Section Title 
-        </span>
-      </div> */}
       <div
         style={{
           width: "100%",
