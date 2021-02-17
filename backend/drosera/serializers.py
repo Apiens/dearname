@@ -30,7 +30,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 
             # 그러나 nginx에서 proxy_pass로 request를 전달하면서 host명을 django로 덮어씀;
             # 임시방편으로 EC2의 address를 그대로 사용
-            return "http://d16c239m5uwjv8.cloudfront.net" + author.avatar_url
+            return "https://d16c239m5uwjv8.cloudfront.net" + author.avatar_url
 
     class Meta:
         model = get_user_model()

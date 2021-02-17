@@ -127,7 +127,7 @@ export default function UserCollections() {
               myCollection
                 .map(
                   (species: any) =>
-                    species.species < 536 && birdDict2[species.species]
+                    species.species < 536 && birdDict2[species.species] // type(species.species) == int
                 )
                 .map((bird) => bird[2])
                 .includes(species)
@@ -160,7 +160,7 @@ export default function UserCollections() {
                     Object.values(birdDict2).filter(
                       (bird) => bird[2] === speciesKOR
                     )[0] &&
-                    "http://" +
+                    "https://" +
                       Object.values(birdDict2).filter(
                         (bird) => bird[2] === speciesKOR
                       )[0][5]
